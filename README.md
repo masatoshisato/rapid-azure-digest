@@ -110,14 +110,32 @@ RSS フィードの255文字制限を AI の推論能力で補完：
 - **重複除去**: URL ベースの重複チェック
 - **エラーハンドリング**: ネットワークエラーや API 制限への対応
 
-## 📅 自動化
+## 📅 自動化 (GitHub Actions)
 
-GitHub Actions での定期実行が可能：
+### セットアップ
+
+1. **GitHub Secrets の設定**:
+   - リポジトリの Settings → Secrets and variables → Actions
+   - `GROQ_API_KEY` に Groq API キーを設定
+
+2. **自動実行**:
+   - 毎日午前0時（UTC）に自動実行
+   - Actions タブから「Daily Azure News Update」を手動実行可能
+
+### ワークフロー機能
+
+- **自動データ更新**: 毎日 Azure RSS を処理
+- **変更検知**: data/news.json に変更があった場合のみコミット
+- **ループ防止**: [skip ci] でワークフロー再実行を回避
+- **Bot コミット**: github-actions[bot] として自動コミット
 
 ```yaml
-# .github/workflows/update-news.yml での自動実行例
-- name: Update Azure News
-  run: npm run update-news
+# .github/workflows/daily-azure-news.yml
+name: Daily Azure News Update
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 毎日午前0時（UTC）
+  workflow_dispatch:     # 手動実行
 ```
 
 ## 🤝 コントリビューション
