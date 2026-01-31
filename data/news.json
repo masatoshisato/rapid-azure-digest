@@ -1,0 +1,33 @@
+{
+  "lastUpdated": "2026-01-31T09:03:51.690Z",
+  "articles": [
+    {
+      "title": "Retirement: \"Send data to Event Hubs & Storage (Preview)\" retiring July 31, 2026",
+      "link": "https://azure.microsoft.com/updates?id=551523",
+      "description": "On July 31, 2026, we'll\r\nretire preview feature “Send virtual machine client data to Event Hubs and\r\nStorage (Preview)” and it will no longer be supported by Microsoft. You will not\r\nbe able to create any new data collection rules using this feature, and any",
+      "japaneseTitle": "廃止: 「イベント ハブとストレージへのデータ送信 (プレビュー)」が 2026 年 7 月 31 日に廃止",
+      "japaneseDescription": "2026 年 7 月 31 日をもって、プレビュー機能「仮想マシンのクライアント データをイベント ハブとストレージ (プレビュー) に送信」が廃止され、Microsoft によるサポートが終了します。この機能を使用した新しいデータ収集ルールの作成はできなくなります。代替手段として Azure Monitor エージェントを使用することをお勧めします。",
+      "technicalTags": [
+        "Event Hubs",
+        "Azure Storage",
+        "Azure Monitor Agent"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-30T18:30:02.000Z"
+    },
+    {
+      "title": "Retirement: Support for Python 3.10 ends on October 1, 2026 – upgrade your Azure Functions apps to Python 3.13",
+      "link": "https://azure.microsoft.com/updates?id=545771",
+      "description": "In alignment with the end of community support, on October 1, 2026, support for Python 3.10 in Azure Functions will end. Your\r\napps that are hosted on Functions will continue to run, but security updates\r\nand performance optimizations will no longer be avai",
+      "japaneseTitle": "廃止: Python 3.10 のサポートは 2026 年 10 月 1 日に終了 – Azure Functions アプリを Python 3.13 にアップグレード",
+      "japaneseDescription": "コミュニティのサポート終了に伴い、2026 年 10 月 1 日に Azure Functions での Python 3.10 のサポートが終了します。Functions でホストされているアプリは引き続き実行されますが、セキュリティ更新とパフォーマンスの最適化は受けられなくなります。Python 3.13 にアップグレードして、最新のセキュリティ更新とパフォーマンスの最適化を受け続けることができます。",
+      "technicalTags": [
+        "Python 3.10",
+        "Python 3.13",
+        "Azure Functions"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-28T23:15:47.000Z"
+    }
+  ]
+}

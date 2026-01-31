@@ -1,0 +1,26 @@
+{
+  "name": "rapid-azure-digest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update-news": "tsx scripts/update-news.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/node-fetch": "^2.6.13",
+    "axios": "^1.13.4",
+    "cheerio": "^1.2.0",
+    "feedparser": "^2.2.10",
+    "groq-sdk": "^0.37.0",
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
