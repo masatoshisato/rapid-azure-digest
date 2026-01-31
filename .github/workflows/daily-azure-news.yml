@@ -1,9 +1,9 @@
 name: Daily Azure News Update
 
 on:
-  # 毎日午前0時（UTC）に自動実行
+  # 毎日午前0時（JST: UTC+9:00）に自動実行
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 15 * * *'  # 15:00 UTC = 0:00 JST
   
   # 手動実行ボタンを表示
   workflow_dispatch:
@@ -23,11 +23,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      # Node.js v22のセットアップ
+      # Node.js v23のセットアップ
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '23'
           cache: 'npm'
       
       # 依存関係のインストール
