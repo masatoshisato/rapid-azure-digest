@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-31T09:03:51.690Z",
+  "lastUpdated": "2026-01-31T23:35:54.186Z",
   "articles": [
     {
       "title": "Retirement: \"Send data to Event Hubs & Storage (Preview)\" retiring July 31, 2026",
@@ -28,6 +28,120 @@
       ],
       "extractedLinks": [],
       "date": "2026-01-28T23:15:47.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Azure AMD Turin Dasv7, Easv7, and Fasv7-series Virtual Machines",
+      "link": "https://azure.microsoft.com/updates?id=552318",
+      "description": "The general purpose Dasv7 and Dalsv7, memory-optimized Easv7, and compute-optimized Fasv7, Falsv7, Famsv7 VMs, are now generally available with and without local disk support. These VMs are available in the following Azure regions: Australia East, Central",
+      "japaneseTitle": "一般提供開始: Azure AMD Turin Dasv7, Easv7, および Fasv7 シリーズ仮想マシン",
+      "japaneseDescription": "汎用の Dasv7 と Dalsv7、メモリ最適化の Easv7、コンピューティング最適化の Fasv7 と Falsv7、Famsv7 仮想マシンが、ローカル ディスク サポートの有無に関係なく、一般提供開始されました。これらの仮想マシンは、オーストラリア東部、中央などの Azure リージョンで利用可能です。",
+      "technicalTags": [
+        "Azure",
+        "AMD Turin",
+        "Dasv7",
+        "Easv7",
+        "Fasv7"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-28T19:15:24.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Azure Databricks Agent Bricks Knowledge Assistant",
+      "link": "https://azure.microsoft.com/updates?id=542455",
+      "description": "Azure Databricks Agent Bricks knowledge assistant empowers you to create, deploy, and manage AI agents directly within the Azure Databricks platform, using unified data and AI capabilities. This feature simplifies agent development by providing prebuilt c",
+      "japaneseTitle": "一般提供開始: Azure Databricks Agent Bricks ナレッジ アシスタント",
+      "japaneseDescription": "Azure Databricks Agent Bricks ナレッジ アシスタントにより、Azure Databricks プラットフォーム内で、統一されたデータと AI 機能を使用して、AI エージェントを作成、展開、管理できます。この機能は、事前に構築されたコンポーネントを提供することで、エージェントの開発を簡素化します。",
+      "technicalTags": [
+        "Azure Databricks",
+        "AI"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-28T18:45:08.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Latest PostgreSQL minor versions supported by Azure Database for PostgreSQL – Flexible Server",
+      "link": "https://azure.microsoft.com/updates?id=550164",
+      "description": "PostgreSQL minor versions 18.1, 17.7, 16.11, 15.15, 14.20, and 13.23 are now supported by Azure Database for PostgreSQL – Flexible Server.    These minor version upgrades are automatically performed as part of the monthly planned maintenance in Azure Data",
+      "japaneseTitle": "一般提供開始: Azure Database for PostgreSQL – Flexible Server でサポートされる最新の PostgreSQL マイナーバージョン",
+      "japaneseDescription": "PostgreSQL マイナーバージョン 18.1、17.7、16.11、15.15、14.20、および 13.23 が Azure Database for PostgreSQL – Flexible Server でサポートされるようになりました。これらのマイナーバージョンのアップグレードは、Azure Data の毎月の計画メンテナンスの一環として自動的に実行されます。",
+      "technicalTags": [
+        "Azure Database for PostgreSQL",
+        "PostgreSQL",
+        "Flexible Server"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-28T17:00:53.000Z"
+    },
+    {
+      "title": "[In preview] Public Preview: Azure NetApp Files support in OpenShift Virtualization",
+      "link": "https://azure.microsoft.com/updates?id=550466",
+      "description": "Azure NetApp Files now\r\nenables fast virtual machine (VM) provisioning, instant cloning, and live\r\nmigration in OpenShift Virtualization. It offers seamlessly scalable storage\r\nwith predictable performance and enterprise data management for VM workloads\r\nfrom",
+      "japaneseTitle": "プレビュー: Azure NetApp Files を使用した OpenShift Virtualization のサポート",
+      "japaneseDescription": "Azure NetApp Files は、OpenShift Virtualization で仮想マシン (VM) の迅速なプロビジョニング、インスタント クローニング、ライブ マイグレーションを可能にします。予測可能なパフォーマンスとエンタープライズ データ管理を備えたスケーラブルなストレージを提供し、VM ワークロードのニーズに対応します。",
+      "technicalTags": [
+        "Azure NetApp Files",
+        "OpenShift Virtualization",
+        "VM"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-27T17:00:06.000Z"
+    },
+    {
+      "title": "[In preview] Public Preview: 7th generation Intel-based VMs – Dlsv7/Dsv7/Esv7",
+      "link": "https://azure.microsoft.com/updates?id=529407",
+      "description": "Announcing the preview of new Azure Dlsv7/Dsv7 General Purpose and Esv7 Memory Optimized Virtual Machines (VMs) powered by the latest Intel® Xeon® 6 processors (Granite Rapids). The latest Azure Intel-based v7 VMs are designed to power ever increasing com",
+      "japaneseTitle": "プレビュー: 7世代IntelベースのVM – Dlsv7/Dsv7/Esv7",
+      "japaneseDescription": "Intel Xeon 6プロセッサ（Granite Rapids）を搭載した新しいAzure Dlsv7/Dsv7汎用仮想マシンとEsv7メモリ最適化仮想マシンのプレビューを発表します。最新のAzure Intelベースのv7 VMは、増加するコンピューティング需要に対応するために設計されています。",
+      "technicalTags": [
+        "Intel Xeon",
+        "Dlsv7",
+        "Dsv7",
+        "Esv7"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-27T17:00:06.000Z"
+    },
+    {
+      "title": "[In preview] Public Preview: Azure Command Launcher for Java",
+      "link": "https://azure.microsoft.com/updates?id=543994",
+      "description": "At Microsoft Ignite 2025, we announced the Public Preview of the Azure Command Launcher for Java, a new JVM launcher optimized specifically for Azure. This tool provides better default ergonomics for Java applications running in containers and virtual mac",
+      "japaneseTitle": "プレビュー: Azure Command Launcher for Java",
+      "japaneseDescription": "Microsoft Ignite 2025で、AzureのJavaアプリケーションをコンテナや仮想マシンで実行するための新しいJVMランチャーであるAzure Command Launcher for Javaのパブリックプレビューを発表しました。このツールは、コンテナや仮想マシンで実行されるJavaアプリケーションに最適化されたデフォルトのエргノミクスを提供します。",
+      "technicalTags": [
+        "Java",
+        "JVM",
+        "Azure"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-27T14:00:07.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Deployment safeguards – pod security standard support in AKS",
+      "link": "https://azure.microsoft.com/updates?id=548101",
+      "description": "Organizations deploying workloads on Kubernetes often need a consistent way\r\nto enforce pod security configurations across clusters. Azure Kubernetes\r\nService (AKS) now supports Pod Security Standards within Deployment Safeguards,\r\nenabling centralized manag",
+      "japaneseTitle": "一般提供開始: デプロイのセーフガード – AKS でのポッド セキュリティ標準のサポート",
+      "japaneseDescription": "Kubernetes でワークロードをデプロイする組織は、クラスター全体でポッドのセキュリティ構成を一貫して適用する方法が必要です。Azure Kubernetes Service (AKS) では、デプロイのセーフガード内でポッド セキュリティ標準をサポートし、集中管理を可能にします。",
+      "technicalTags": [
+        "Azure Kubernetes Service",
+        "Kubernetes",
+        "Pod Security Standards"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-22T22:30:50.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: StandardV2 NAT Gateway with zone-redundancy and StandardV2 public IPs",
+      "link": "https://azure.microsoft.com/updates?id=547772",
+      "description": "StandardV2 SKU NAT Gateway is now generally available, delivering enhanced resiliency, greater performance, and dual-stack connectivity, all at the same price as the Standard SKU.  StandardV2 Public IP addresses and prefixes are also generally available.",
+      "japaneseTitle": "一般提供開始: StandardV2 NAT ゲートウェイと StandardV2 パブリック IP",
+      "japaneseDescription": "StandardV2 SKU NAT ゲートウェイが一般提供開始され、耐久性、パフォーマンス、デュアルスタック接続性が向上し、Standard SKU と同じ価格で提供される。また、StandardV2 パブリック IP アドレスとプレフィックスも一般提供開始された。",
+      "technicalTags": [
+        "NAT Gateway",
+        "StandardV2",
+        "Public IP"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-22T17:30:31.000Z"
     }
   ]
 }
