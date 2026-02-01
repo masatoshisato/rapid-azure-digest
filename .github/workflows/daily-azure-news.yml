@@ -1,0 +1,62 @@
+name: Daily Azure News Update
+
+on:
+  # 毎日午前0時（JST: UTC+9:00）に自動実行
+  schedule:
+    - cron: '0 15 * * *'  # 15:00 UTC = 0:00 JST
+  
+  # 手動実行ボタンを表示
+  workflow_dispatch:
+
+# リポジトリにJSONファイルを書き込むための権限
+permissions:
+  contents: write
+
+jobs:
+  update-azure-news:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # リポジトリのチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Node.js v23のセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23'
+          cache: 'npm'
+      
+      # 依存関係のインストール
+      - name: Install dependencies
+        run: npm install
+      
+      # Azure RSS処理スクリプトの実行
+      - name: Update Azure news
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: npx tsx scripts/update-news.ts
+      
+      # 変更があった場合のみコミット・プッシュ
+      - name: Commit and push changes
+        run: |
+          # Git設定
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # 変更をチェック
+          if git diff --quiet data/news.json; then
+            echo "No changes in news.json, skipping commit"
+          else
+            echo "Changes detected in news.json, committing..."
+            git add data/news.json
+            git commit -m "feat: update Azure news data [skip ci]
+            
+            - Updated Azure RSS feed data
+            - Automated daily update via GitHub Actions
+            - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git push
+          fi
