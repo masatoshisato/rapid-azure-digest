@@ -1,0 +1,23 @@
+# Azure Static Web Apps デプロイ除外設定
+
+# Node.js依存関係 (開発用のみ)
+node_modules/
+
+# TypeScript設定・ビルドファイル
+tsconfig.json
+scripts/
+infrastructure/
+
+# ドキュメント・設定ファイル
+docs/
+.env*
+.gitignore
+README.md
+debug-workflow.sh
+
+# パッケージ管理ファイル
+package.json
+package-lock.json
+
+# 大きなデータファイルの場合は制限を検討
+# data/news.json のサイズが問題なら個別対応

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "staticWebAppName": {
+      "value": "rapid-azure-digest"
+    },
+    "location": {
+      "value": "eastus2"
+    },
+    "appSettings": {
+      "value": {
+        "BUILD_FLAGS": "",
+        "SKIP_APP_BUILD": "false"
+      }
+    },
+    "tags": {
+      "value": {
+        "project": "rapid-azure-digest",
+        "environment": "production",
+        "purpose": "azure-news-display",
+        "tier": "free",
+        "cost-center": "engineering",
+        "auto-shutdown": "false"
+      }
+    }
+  }
+}
