@@ -10,22 +10,22 @@ brew install azure-cli jq  # macOS
 az login
 ```
 
-### 2. SWA作成 (Bicep使用)
+### 2. SWA作成 (Bicep使用) - 実際の設定例
 ```bash
 cd infrastructure
 ./deploy-staticwebapp.sh \
-  --subscription "YOUR_SUBSCRIPTION_ID" \
-  --resource-group "YOUR_RESOURCE_GROUP" \
-  --location "eastasia"  # 日本から最速
+  --subscription "871e8b6f-0727-42ce-840e-02bf7d76541a" \
+  --resource-group "DailyAzureNewsUpdate" \
+  --location "eastus2"  # または eastasia (日本から最速)
 ```
 
-### 3. ファイルデプロイ
+### 3. ファイルデプロイ - 実際の設定例
 ```bash
-cd /path/to/your/project
+cd /Users/sato/proj/rapid-azure-digest
 swa deploy \
-  --resource-group "YOUR_RESOURCE_GROUP" \
-  --app-name "your-app-name" \
-  --app-location "." \
+  --resource-group "DailyAzureNewsUpdate" \
+  --app-name "rapid-azure-digest" \
+  --app-location "./deploy-temp" \
   --env production
 ```
 
@@ -38,13 +38,21 @@ swa deploy \
 # SWA一覧
 az staticwebapp list --output table
 
-# URL確認
-az staticwebapp show --name "app-name" --resource-group "rg-name" --query "defaultHostname" -o tsv
+# URL確認 - 実際の例
+az staticwebapp show \
+  --name "rapid-azure-digest" \
+  --resource-group "DailyAzureNewsUpdate" \
+  --query "defaultHostname" -o tsv
+# → salmon-beach-0b86ff00f.4.azurestaticapps.net
 
-# クリーンデプロイ (推奨)
+# クリーンデプロイ (推奨) - 実際の例
 cp index.html deploy-temp/
 cp -r data/ deploy-temp/
-swa deploy --resource-group "rg-name" --app-name "app-name" --app-location "./deploy-temp" --env production
+swa deploy \
+  --resource-group "DailyAzureNewsUpdate" \
+  --app-name "rapid-azure-digest" \
+  --app-location "./deploy-temp" \
+  --env production
 ```
 
 ## 🔧 トラブルシューティング

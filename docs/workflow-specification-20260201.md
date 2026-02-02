@@ -1,12 +1,19 @@
 # Azure RSS自動処理ワークフローシステム設計書
 
 **作成日:** 2026年2月1日  
+**最終更新:** 2026年2月2日  
 **プロジェクト:** rapid-azure-digest  
 **対象ファイル:** .github/workflows/daily-azure-news.yml  
 
+> **⚠️ 更新情報 (2026-02-02):**
+> - GitHub Actions を v3 に変更 (VSCodeエラー対応)
+> - Node.js を v20 LTS に変更
+> - Azure Static Web Apps 自動デプロイ機能を追加
+> - 本番サイト: https://salmon-beach-0b86ff00f.4.azurestaticapps.net
+
 ## 📋 ワークフロー概要
 
-Microsoft Azure RSS フィードを自動取得し、AI翻訳・要約処理を行い、結果をGitHubリポジトリに自動コミットする完全自動化システム。日本語でのAzureニュース配信を目的とした、24時間365日稼働するワークフローです。
+Microsoft Azure RSS フィードを自動取得し、AI翻訳・要約処理を行い、結果をGitHubリポジトリに自動コミットし、Azure Static Web Appsに自動デプロイする完全自動化システム。日本語でのAzureニュース配信を目的とした、24時間365日稼働するワークフローです。
 
 ---
 
@@ -14,9 +21,10 @@ Microsoft Azure RSS フィードを自動取得し、AI翻訳・要約処理を�
 
 ### 実行環境
 - **プラットフォーム:** ubuntu-latest (GitHub Actions)
-- **Node.js:** v23 (LTS)
+- **Node.js:** v20 (LTS) *※v23から変更*
 - **パッケージマネージャー:** npm with cache
 - **実行間隔:** 毎日午前0時 JST (15:00 UTC)
+- **デプロイ:** Azure Static Web Apps 自動デプロイ *※新機能*
 
 ### トリガー設定
 ```yaml

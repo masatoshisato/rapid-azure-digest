@@ -77,13 +77,14 @@ tsconfig.json
 #!/bin/bash
 # 実際の実行例
 
+```bash
 # 1. 東アジア (香港) でデプロイ - 推奨
 ./deploy-staticwebapp.sh \
   --subscription "871e8b6f-0727-42ce-840e-02bf7d76541a" \
   --resource-group "DailyAzureNewsUpdate" \
   --location "eastasia"
 
-# 2. デフォルト (eastus2) でデプロイ
+# 2. デフォルト (eastus2) でデプロイ - 現在の設定
 ./deploy-staticwebapp.sh \
   --subscription "871e8b6f-0727-42ce-840e-02bf7d76541a" \
   --resource-group "DailyAzureNewsUpdate"
@@ -91,12 +92,12 @@ tsconfig.json
 # 成功時の出力例:
 # [SUCCESS] デプロイメント完了!
 # • サイト URL: https://salmon-beach-0b86ff00f.4.azurestaticapps.net
-# • リージョン: East Asia
+# • リージョン: East US 2
 ```
 
 ### SWA CLI デプロイ例
 ```bash
-# プロダクション環境へのデプロイ
+# プロダクション環境へのデプロイ - 実際の設定
 swa deploy \
   --resource-group "DailyAzureNewsUpdate" \
   --app-name "rapid-azure-digest" \

@@ -1,53 +1,75 @@
-# Azure Static Web App 構成説明書
+# Azure Static Web App インフラストラクチャ
 
-**作成日:** 2026年2月1日  
 **プロジェクト:** rapid-azure-digest  
-**目的:** Azure Static Web Apps による静的サイトホスティング構成
+**目的:** Azure Static Web Apps による AI翻訳Azureニュースサイトのホスティング  
+**最終更新:** 2026年2月2日
 
-## 📋 構成概要
+## 📋 インフラ概要
 
-このディレクトリには、Azure Static Web Apps を使用してindex.htmlとdata/news.jsonをホストするためのインフラストラクチャコード（IaC）が含まれています。
+このディレクトリには、Azure Static Web Apps を使用してAzureニュースダイジェストサイトをホストするためのInfrastructure as Code (IaC)が含まれています。
 
 ### ファイル構成
 ```
 infrastructure/
-├── staticwebapp.bicep           # Bicep IaC テンプレート
-├── staticwebapp.parameters.json # デプロイメント パラメータ
-├── deploy-staticwebapp.sh       # デプロイメント スクリプト
+├── staticwebapp.bicep           # Bicep IaC テンプレート (Azure Verified Modules使用)
+├── staticwebapp.parameters.json # デプロイメント パラメータ (現在の本番設定)
+├── deploy-staticwebapp.sh       # 自動化デプロイメント スクリプト
 └── README.md                    # 本ドキュメント
 ```
+
+### 現在の本番環境
+- **URL**: https://salmon-beach-0b86ff00f.4.azurestaticapps.net
+- **リソース名**: `rapid-azure-digest`
+- **リソースグループ**: `DailyAzureNewsUpdate`
+- **リージョン**: `East US 2`
+- **プラン**: Free
 
 ## 🎯 前提条件
 
 ### 必要なツール
-- **Azure CLI** (最新版)
-- **jq** (JSON処理用)
+- **Azure CLI** (最新版) - `az --version`
+- **jq** (JSON処理用) - `brew install jq`
 - **Bash** (macOS/Linux標準)
 
-### Azure アカウント
+### Azure アカウント要件
 - 有効な Azure サブスクリプション
 - リソースグループ作成権限
-- Azure CLI でのログイン済み
+- Static Web Apps リソース作成権限
+- Azure CLI でのログイン済み (`az login`)
+
+### サポートされているリージョン
+Azure Static Web Apps は以下のリージョンでのみ利用可能：
+
+| リージョン | コード | 日本からの推奨度 |
+|------------|--------|------------------|
+| 東アジア (香港) | `eastasia` | ⭐⭐⭐ **推奨** |
+| 米国東部2 | `eastus2` | ⭐⭐ **(現在使用中)** |
+| 米国中部 | `centralus` | ⭐ |
+| 西ヨーロッパ | `westeurope` | ⭐ |
+| 米国西部2 | `westus2` | ⭐⭐ |
+
+⚠️ **注意**: `japaneast` は**サポートされていません**
 
 ## 🚀 デプロイ手順
 
-### 1. 基本的なデプロイ
+### 1. 現在の本番環境と同じ設定でデプロイ
 ```bash
 cd infrastructure/
 ./deploy-staticwebapp.sh \
-  --subscription "your-subscription-id" \
-  --resource-group "rg-rapid-azure-digest"
+  --subscription "871e8b6f-0727-42ce-840e-02bf7d76541a" \
+  --resource-group "DailyAzureNewsUpdate"
+# デフォルト: eastus2, rapid-azure-digest
 ```
 
-### 2. カスタムリージョンでのデプロイ
+### 2. 日本からの最適化（東アジア）でデプロイ
 ```bash
 ./deploy-staticwebapp.sh \
-  --subscription "your-subscription-id" \
-  --resource-group "rg-rapid-azure-digest" \
-  --location "westeurope"
+  --subscription "871e8b6f-0727-42ce-840e-02bf7d76541a" \
+  --resource-group "DailyAzureNewsUpdate" \
+  --location "eastasia"
 ```
 
-### 3. GitHub統合付きデプロイ
+### 3. 新しいリソースグループでデプロイ
 ```bash
 ./deploy-staticwebapp.sh \
   --subscription "your-subscription-id" \
