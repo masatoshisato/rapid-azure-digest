@@ -67,15 +67,23 @@ GROQ_API_KEY=your_groq_api_key_here
 
 ### ニュースデータ更新
 ```bash
-# 全記事を処理
+# デフォルト（推奨）- 100件制限でRate limit対策
 npm run update-news
 
-# 制限付き処理（テスト用）
-npm run update-news 5
+# 全記事を処理（Rate limitリスク有り）
+npm run update-news:all
 
-# デバッグログ付き
-npm run update-news --debug
+# デバッグログ付き（100件制限）
+npm run update-news:debug
+
+# カスタム件数指定
+npx tsx scripts/update-news.ts 50
+
+# 詳細オプション
+npx tsx scripts/update-news.ts --help
 ```
+
+> 💡 **Rate Limit対策**: デフォルトでは100件制限を適用してGroq APIの制限を回避します。空のnews.jsonから開始する場合は特に重要です。
 
 ### 静的サイトの確認
 ```bash
@@ -180,10 +188,32 @@ jobs:
 
 ```
 毎日午前0時 →
-├── RSS取得・解析
-├── AI翻訳・要約
+├── RSS取得・解析（最大100件）
+├── AI翻訳・要約（Rate limit対策）
 ├── データ更新検知
 └── 変更あり → SWAに自動デプロイ → 本番サイト更新
+```
+
+### Rate Limit対策 🛡️
+
+システムは**100件制限**を適用して、Groq APIの制限を自動回避します：
+
+| 実行方法 | 処理件数 | 推奨用途 |
+|---------|---------|----------|
+| `npm run update-news` | 100件 | **日次運用（推奨）** |
+| `npm run update-news:all` | 全件 | 初回セットアップ |
+| `npm run update-news:debug` | 100件 | 開発・デバッグ |
+
+**空のnews.jsonから開始する場合**:
+```bash
+# 1. 最初の100件を安全に処理
+npm run update-news
+
+# 2. 必要に応じて追加実行
+npm run update-news
+
+# 3. すべてのデータが必要な場合（注意が必要）
+npm run update-news:all
 ```
 
 ### セットアップ手順
