@@ -19,13 +19,13 @@ jobs:
     steps:
       # リポジトリのチェックアウト
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
       # Node.js セットアップ
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
@@ -75,3 +75,4 @@ jobs:
           app_location: "/" # アプリソースコードの場所
           api_location: "" # API ソースコードの場所（なし）
           output_location: "" # ビルド出力の場所（なし）
+          skip_app_build: true # ビルドプロセスをスキップ
