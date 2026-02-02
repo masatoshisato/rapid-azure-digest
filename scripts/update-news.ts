@@ -293,7 +293,7 @@ class AzureNewsProcessor {
     });
   }
 
-  async processUpdates(limitCount?: number): Promise<void> {
+  async processUpdates(limitCount: number = 100): Promise<void> {
     const startTime = new Date();
     Logger.info('=== Azure RSS ニュース処理開始 ===');
     Logger.info(`処理開始時刻: ${Logger.getCurrentTime()}`);
@@ -320,13 +320,12 @@ class AzureNewsProcessor {
         return;
       }
 
-      // 処理件数を制限
-      const itemsToProcess = limitCount ? recentRssItems.slice(0, limitCount) : recentRssItems;
+      // 処理件数を制限（デフォルト100件）
+      const itemsToProcess = recentRssItems.slice(0, limitCount);
       
-      if (limitCount) {
-        Logger.info(`今回処理対象: 最初の${itemsToProcess.length}件 (制限: ${limitCount})`);
-      } else {
-        Logger.info(`今回処理対象: ${itemsToProcess.length}件 (全件処理)`);
+      Logger.info(`今回処理対象: 最初の${itemsToProcess.length}件 (制限: ${limitCount}件)`);
+      if (recentRssItems.length > limitCount) {
+        Logger.info(`注意: ${recentRssItems.length - limitCount}件の記事を切り捨てました（Rate limit対策）`);
       }
       
       // 既存データを読み込み
@@ -452,12 +451,12 @@ async function main() {
     } else if (!isNaN(parseInt(arg, 10))) {
       // 数値は制限数として扱う
       const limit = parseInt(arg, 10);
-      if (limit <= 0) {
-        Logger.error('Error: Limit must be a positive number');
+      if (limit < 0) {
+        Logger.error('Error: Limit must be a non-negative number');
         printUsage();
         process.exit(1);
       }
-      limitCount = limit;
+      limitCount = limit === 0 ? Number.MAX_SAFE_INTEGER : limit; // 0の場合は実質無制限
     } else if (arg === '--help' || arg === '-h') {
       printUsage();
       process.exit(0);
@@ -498,13 +497,14 @@ OPTIONS:
   --help, -h               このヘルプを表示
 
 ARGUMENTS:
-  LIMIT                    処理する記事数の上限 (省略時は全件処理)
+  LIMIT                    処理する記事数の上限 (デフォルト: 100件, 0で全件処理)
 
 例:
-  npx tsx scripts/update-news.ts                    # 全記事をINFOレベルで処理
-  npx tsx scripts/update-news.ts 5                  # 最初の5件をINFOレベルで処理
+  npx tsx scripts/update-news.ts                    # 100件をINFOレベルで処理
+  npx tsx scripts/update-news.ts 5                  # 最初の5件をINFOレベルで処理  
+  npx tsx scripts/update-news.ts 0                  # 全記事を処理 (Rate limitに注意)
   npx tsx scripts/update-news.ts --debug 3          # 最初の3件をDEBUGレベルで処理
-  npx tsx scripts/update-news.ts --log-level DEBUG  # 全記事をDEBUGレベルで処理
+  npx tsx scripts/update-news.ts --log-level DEBUG  # 100件をDEBUGレベルで処理
 `);
 }
 

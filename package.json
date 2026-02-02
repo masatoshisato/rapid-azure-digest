@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "update-news": "tsx scripts/update-news.ts",
+    "update-news:all": "tsx scripts/update-news.ts 0",
+    "update-news:debug": "tsx scripts/update-news.ts --debug",
     "build": "echo 'No build process needed for static files' && exit 0"
   },
   "keywords": [],
