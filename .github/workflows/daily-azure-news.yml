@@ -23,11 +23,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      # Node.js v23のセットアップ
+      # Node.js セットアップ
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '23'
+          node-version: '20'
           cache: 'npm'
       
       # 依存関係のインストール
