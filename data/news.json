@@ -1,6 +1,48 @@
 {
-  "lastUpdated": "2026-02-02T13:39:54.604Z",
+  "lastUpdated": "2026-02-03T15:16:48.154Z",
   "articles": [
+    {
+      "title": "Retirement: Azure Front Door and Azure CDN profiles will end support for DHE cipher suites on April 1, 2026",
+      "link": "https://azure.microsoft.com/updates?id=553527",
+      "description": "As part of our ongoing commitment to security, Azure Front Door (Standard, Premium, Classic) and Azure CDN from Microsoft (Classic) services will no longer support  weak cipher suites TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_DHE_RSA_WITH_AES_128_GCM_SH",
+      "japaneseTitle": "廃止: Azure Front DoorおよびAzure CDNプロファイルは2026年4月1日にDHE暗号スイートのサポートを終了する",
+      "japaneseDescription": "セキュリティへの取り組みの一環として、Azure Front Door（Standard、Premium、Classic）およびAzure CDN from Microsoft（Classic）サービスは、弱い暗号スイートであるTLS_DHE_RSA_WITH_AES_256_GCM_SHA384とTLS_DHE_RSA_WITH_AES_128_GCM_SHAをサポートしなくなる。",
+      "technicalTags": [
+        "Azure Front Door",
+        "Azure CDN",
+        "TLS",
+        "DHE"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-02T18:15:39.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Serverless workspaces in Azure Databricks",
+      "link": "https://azure.microsoft.com/updates?id=550845",
+      "description": "Serverless workspaces in Azure Databricks are now generally available, offering a fully managed workspace type that comes preconfigured with serverless compute and default storage. They deliver an enterprise-ready SaaS experience with zero infrastructure",
+      "japaneseTitle": "一般提供開始: Azure Databricksのサーバーレス ワークスペース",
+      "japaneseDescription": "Azure Databricksのサーバーレス ワークスペースが一般提供開始され、サーバーレス コンピューティングとデフォルトのストレージが事前に構成された、フルマネージドのワークスペース タイプを提供します。これにより、ゼロ インフラストラクチャでエンタープライズ レディのSaaS体験が実現します。",
+      "technicalTags": [
+        "Azure Databricks",
+        "Serverless"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-02T18:15:39.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Default Ruleset 2.2 in WAF for Azure Application Gateway",
+      "link": "https://azure.microsoft.com/updates?id=553532",
+      "description": "Announcing the general availability of Default Rule Set (DRS) 2.2 for Web Application Firewall on Azure Application Gateway.The Azure-managed DRS provides active protection against common web vulnerabilities and exploits. It also includes Microsoft Threat",
+      "japaneseTitle": "一般提供開始: Azure Application Gateway の Web Application Firewall で Default Ruleset 2.2",
+      "japaneseDescription": "Azure Application Gateway の Web Application Firewall で Default Rule Set (DRS) 2.2 が一般提供開始されました。Azure 管理の DRS は、一般的な Web 脆弱性や悪用に対するアクティブな保護を提供し、Microsoft Threat Intelligence を含みます。",
+      "technicalTags": [
+        "Web Application Firewall",
+        "Azure Application Gateway",
+        "Default Rule Set"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-02T17:45:01.000Z"
+    },
     {
       "title": "Retirement: \"Send data to Event Hubs & Storage (Preview)\" retiring July 31, 2026",
       "link": "https://azure.microsoft.com/updates?id=551523",
