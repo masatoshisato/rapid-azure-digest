@@ -1,6 +1,49 @@
 {
-  "lastUpdated": "2026-02-03T15:16:48.154Z",
+  "lastUpdated": "2026-02-04T15:15:40.064Z",
   "articles": [
+    {
+      "title": "[In development] Public Preview: X-Forwarded-For (XFF) grouping for rate limiting on Application Gateway WAF v2",
+      "link": "https://azure.microsoft.com/updates?id=555205",
+      "description": "Application Gateway Web Application Firewall (WAF) v2 now supports additional rate‑limiting GroupBy options based on the X‑Forwarded‑For (XFF) HTTP header. This enables customers running Application Gateway behind proxies or CDNs to apply rate limits usin",
+      "japaneseTitle": "開発中: パブリック プレビュー: Application Gateway WAF v2 での X-Forwarded-For (XFF) グループ化によるレート制限",
+      "japaneseDescription": "Application Gateway Web Application Firewall (WAF) v2 では、X-Forwarded-For (XFF) HTTP ヘッダーに基づく追加のレート制限グループ化オプションがサポートされるようになりました。これにより、プロキシまたは CDN の背後で Application Gateway を実行している顧客が、XFF ヘッダーを使用してレート制限を適用できるようになります。",
+      "technicalTags": [
+        "Application Gateway",
+        "Web Application Firewall",
+        "WAF",
+        "X-Forwarded-For",
+        "HTTP"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-03T20:30:31.000Z"
+    },
+    {
+      "title": "[Launched] Generally Available: Azure Container Storage v2.1.0 now with Elastic SAN integration and on demand installation",
+      "link": "https://azure.microsoft.com/updates?id=553917",
+      "description": "Azure Container Storage v2.1.0 is now generally available. This release adds native Elastic SAN support and introduces a lightweight, on-demand installation model to simplify deployment and operations for Kubernetes workloads on Azure. Elastic SAN Storage",
+      "japaneseTitle": "一般提供開始: Azure Container Storage v2.1.0 - Elastic SAN統合とオンデマンドインストール",
+      "japaneseDescription": "Azure Container Storage v2.1.0が一般提供開始されました。このリリースでは、ネイティブのElastic SANサポートが追加され、AzureでのKubernetesワークロードのデプロイと運用を簡素化するための軽量なオンデマンドインストールモデルが導入されています。Elastic SANストレージにより、より効率的なデータ管理が可能になります。",
+      "technicalTags": [
+        "Azure Container Storage",
+        "Elastic SAN",
+        "Kubernetes"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-03T20:30:31.000Z"
+    },
+    {
+      "title": "[In preview] Public Preview: Azure Kubernetes Fleet Manager namespace-scoped resource placement",
+      "link": "https://azure.microsoft.com/updates?id=548198",
+      "description": "Namespace-scoped resource placement, now\r\nin preview for Azure Kubernetes Fleet Manager, delivers fine‑grained control\r\nover selection and propagation of individual namespace‑scoped resources across\r\nmultiple clusters.   This new capability means\r\nit is now p",
+      "japaneseTitle": "プレビュー: Azure Kubernetes Fleet Manager の名前空間スコープのリソース配置",
+      "japaneseDescription": "Azure Kubernetes Fleet Manager の名前空間スコープのリソース配置は、プレビュー段階にあり、複数のクラスター全体で個々の名前空間スコープのリソースの選択と伝播に対する細粒度の制御を提供します。この新しい機能により、名前空間スコープのリソースをより効率的に管理できるようになります。",
+      "technicalTags": [
+        "Azure Kubernetes Fleet Manager",
+        "Kubernetes"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-03T20:30:31.000Z"
+    },
     {
       "title": "Retirement: Azure Front Door and Azure CDN profiles will end support for DHE cipher suites on April 1, 2026",
       "link": "https://azure.microsoft.com/updates?id=553527",
