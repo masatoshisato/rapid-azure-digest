@@ -1,30 +1,30 @@
 {
   "name": "rapid-azure-digest",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Azure Daily News Digest - RSS aggregation and AI summarization",
+  "private": true,
+  "workspaces": [
+    "api",
+    "scripts"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "update-news": "tsx scripts/update-news.ts",
-    "update-news:all": "tsx scripts/update-news.ts 0",
-    "update-news:debug": "tsx scripts/update-news.ts --debug",
-    "build": "echo 'No build process needed for static files' && exit 0"
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspace=api",
+    "dev": "./dev.sh",
+    "update-news": "npm run update-news --workspace=scripts",
+    "install-all": "npm install --workspaces",
+    "clean": "npm run clean --workspaces --if-present",
+    "help": "echo '🚀 Quick Commands:' && echo '  npm run dev     - Start development server' && echo '  npm run build   - Build all projects' && echo '  npm run update-news - Update RSS news' && echo '' && echo '📖 Documentation:' && echo '  README.md - Full documentation' && echo '  LOCAL_DEVELOPMENT.md - Quick reference' && echo '' && echo '⚠️  Node.js v20 required! Run: export PATH=\"/usr/local/opt/node@20/bin:$PATH\"'",
+    "check-node": "node --version && echo 'Node.js version check completed. Required: v20.x.x'",
+    "postinstall": "npm run install-all"
   },
-  "keywords": [],
+  "keywords": ["azure", "rss", "news", "ai", "summary"],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "@azure/static-web-apps-cli": "^2.0.7",
-    "@types/cheerio": "^0.22.35",
-    "@types/node-fetch": "^2.6.13",
-    "axios": "^1.13.4",
-    "cheerio": "^1.2.0",
-    "feedparser": "^2.2.10",
-    "groq-sdk": "^0.37.0",
-    "node-fetch": "^3.3.2",
-    "rss-parser": "^3.13.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+  "devDependencies": {
+    "@azure/static-web-apps-cli": "^2.0.7"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

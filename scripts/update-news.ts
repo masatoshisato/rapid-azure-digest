@@ -4,6 +4,11 @@ import * as cheerio from 'cheerio';
 import { Groq } from 'groq-sdk';
 import fs from 'fs';
 import path from 'path';
+import { CosmosClient, Container, Database } from '@azure/cosmos';
+import dotenv from 'dotenv';
+
+// 環境変数を読み込み（プロジェクトルートの .env ファイルを指定）
+dotenv.config({ path: '../.env' });
 
 // ログレベル定義
 enum LogLevel {
@@ -54,6 +59,7 @@ interface CustomRSSItem {
 }
 
 interface NewsItem {
+  id?: string; // Cosmos DB用のユニークID
   title: string;
   link: string;
   description: string;
@@ -71,6 +77,9 @@ interface StoredData {
 
 class AzureNewsProcessor {
   private groq: Groq;
+  private cosmosClient: CosmosClient;
+  private database: Database;
+  private container: Container;
   private dataDir: string;
   private dataFile: string;
   private rssUrl: string = 'https://www.microsoft.com/releasecommunications/api/v2/azure/rss';
@@ -79,7 +88,22 @@ class AzureNewsProcessor {
     this.groq = new Groq({
       apiKey: process.env.GROQ_API_KEY
     });
+
+    // Cosmos DB クライアントの初期化
+    const endpoint = process.env.COSMOS_DB_ENDPOINT;
+    const key = process.env.COSMOS_DB_KEY;
+    const databaseName = process.env.COSMOS_DB_DATABASE_NAME || 'NewsDatabase';
+    const containerName = process.env.COSMOS_DB_CONTAINER_NAME || 'Articles';
+
+    if (!endpoint || !key) {
+      throw new Error('Cosmos DB endpoint and key must be provided in environment variables');
+    }
+
+    this.cosmosClient = new CosmosClient({ endpoint, key });
+    this.database = this.cosmosClient.database(databaseName);
+    this.container = this.database.container(containerName);
     
+    // 後方互換性のためのファイル設定（必要に応じて）
     this.dataDir = path.join(process.cwd(), 'data');
     this.dataFile = path.join(this.dataDir, 'news.json');
     
@@ -221,7 +245,6 @@ class AzureNewsProcessor {
         };
       } catch (parseError) {
         Logger.error('JSON parse error:', parseError);
-        Logger.debug('Normalized JSON:', normalizedJson || 'undefined');
         Logger.debug('Raw response:', responseText);
         throw new Error(`Failed to parse JSON response: ${parseError}`);
       }
@@ -238,7 +261,32 @@ class AzureNewsProcessor {
     }
   }
 
-  private loadExistingData(): StoredData {
+  private async loadExistingData(): Promise<StoredData> {
+    try {
+      // Cosmos DBから既存の記事を取得
+      const querySpec = {
+        query: "SELECT * FROM c ORDER BY c.date DESC"
+      };
+      
+      const { resources: articles } = await this.container.items.query<NewsItem>(querySpec).fetchAll();
+      
+      // 365日以内の記事をフィルタリング
+      const recentArticles = this.filterRecentArticles(articles);
+      Logger.debug(`Loaded ${articles.length} articles from Cosmos DB, ${recentArticles.length} are recent (within 365 days)`);
+      
+      return {
+        lastUpdated: new Date().toISOString(),
+        articles: recentArticles
+      };
+    } catch (error) {
+      Logger.error('Error loading data from Cosmos DB:', error);
+      
+      // フォールバック: ファイルからデータを読み込む
+      return this.loadExistingDataFromFile();
+    }
+  }
+
+  private loadExistingDataFromFile(): StoredData {
     try {
       if (fs.existsSync(this.dataFile)) {
         const data = fs.readFileSync(this.dataFile, 'utf-8');
@@ -246,7 +294,7 @@ class AzureNewsProcessor {
         
         // 読み込み時に古いデータ（365日以前）を削除
         const recentArticles = this.filterRecentArticles(parsedData.articles || []);
-        Logger.debug(`Loaded ${parsedData.articles?.length || 0} articles, ${recentArticles.length} are recent (within 365 days)`);
+        Logger.debug(`Loaded ${parsedData.articles?.length || 0} articles from file, ${recentArticles.length} are recent (within 365 days)`);
         
         return {
           lastUpdated: parsedData.lastUpdated || new Date().toISOString(),
@@ -254,7 +302,7 @@ class AzureNewsProcessor {
         };
       }
     } catch (error) {
-      Logger.error('Error loading existing data:', error);
+      Logger.error('Error loading existing data from file:', error);
     }
     
     return {
@@ -263,14 +311,63 @@ class AzureNewsProcessor {
     };
   }
 
-  private saveData(data: StoredData): void {
+  private async saveData(data: StoredData): Promise<void> {
     try {
-      fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
-      Logger.debug(`Data saved to ${this.dataFile}`);
+      // 新しい記事をCosmos DBに保存
+      for (const article of data.articles) {
+        if (!article.id) {
+          // リンクをベースにしたユニークIDを生成
+          article.id = this.generateArticleId(article.link);
+        }
+        
+        try {
+          // upsert（存在しない場合は作成、存在する場合は更新）
+          await this.container.items.upsert(article);
+          Logger.debug(`Saved article to Cosmos DB: ${article.title}`);
+        } catch (dbError) {
+          Logger.error(`Error saving article to Cosmos DB:`, dbError);
+          // 個別のエラーでも続行
+        }
+      }
+      
+      Logger.info(`Data saved to Cosmos DB: ${data.articles.length} articles`);
+      
+      // 後方互換性のためにファイルにも保存
+      await this.saveDataToFile(data);
+      
     } catch (error) {
-      Logger.error('Error saving data:', error);
+      Logger.error('Error saving data to Cosmos DB:', error);
+      // フォールバック: ファイルに保存
+      await this.saveDataToFile(data);
       throw error;
     }
+  }
+
+  private async saveDataToFile(data: StoredData): Promise<void> {
+    try {
+      fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
+      Logger.debug(`Data saved to file: ${this.dataFile}`);
+    } catch (error) {
+      Logger.error('Error saving data to file:', error);
+      throw error;
+    }
+  }
+
+  private generateArticleId(link: string): string {
+    // URLからクエリパラメータのIDを抽出してユニークIDを生成
+    try {
+      const url = new URL(link);
+      const urlId = url.searchParams.get('id');
+      if (urlId) {
+        return `azure_${urlId}`;
+      }
+    } catch (error) {
+      // URLパースに失敗した場合のフォールバック
+    }
+    
+    // フォールバック: ハッシュベースのID生成
+    const crypto = require('crypto');
+    return crypto.createHash('md5').update(link).digest('hex').slice(0, 32);
   }
 
   private filterRecentArticles(articles: NewsItem[]): NewsItem[] {
@@ -330,7 +427,7 @@ class AzureNewsProcessor {
       
       // 既存データを読み込み
       Logger.info('既存データを読み込み中...');
-      const existingData = this.loadExistingData();
+      const existingData = await this.loadExistingData();
       const existingUrls = new Set(existingData.articles.map(a => a.link));
       
       const newArticles: NewsItem[] = [];
@@ -393,22 +490,22 @@ class AzureNewsProcessor {
       const allArticles = [...existingData.articles, ...newArticles];
       
       // 日付の降順でソート（新しい記事が先頭に）
-      allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
+      allArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
       // データを保存
-      Logger.info('JSONファイルへの書き込み中...');
+      Logger.info('Cosmos DBとJSONファイルへの書き込み中...');
       const updatedData: StoredData = {
         lastUpdated: new Date().toISOString(),
         articles: allArticles
       };
 
-      this.saveData(updatedData);
+      await this.saveData(updatedData);
       
       const endTime = new Date();
       const processingTimeMs = endTime.getTime() - startTime.getTime();
       const processingTimeSec = Math.round(processingTimeMs / 1000);
       
-      Logger.info('JSONファイル書き込み完了');
+      Logger.info('書き込み完了');
       Logger.info('=== 処理結果サマリー ===');
       Logger.info(`新規処理記事: ${processed}件`);
       Logger.info(`スキップ記事: ${skipped}件 (既存)`);
@@ -474,6 +571,12 @@ async function main() {
   if (!process.env.GROQ_API_KEY) {
     Logger.error('Error: GROQ_API_KEY environment variable is required');
     Logger.error('Please set it with: export GROQ_API_KEY="your-api-key"');
+    process.exit(1);
+  }
+  
+  if (!process.env.COSMOS_DB_ENDPOINT || !process.env.COSMOS_DB_KEY) {
+    Logger.error('Error: Cosmos DB environment variables are required');
+    Logger.error('Please set COSMOS_DB_ENDPOINT and COSMOS_DB_KEY in .env file');
     process.exit(1);
   }
   

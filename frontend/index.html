@@ -186,7 +186,8 @@
 
             async loadArticles() {
                 try {
-                    const response = await fetch('./data/news.json');
+                    // Static JSON file から API endpoint に変更
+                    const response = await fetch('/api/articles');
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -203,7 +204,7 @@
                         `最終更新: ${this.formatDate(lastUpdated)}`;
                     
                 } catch (error) {
-                    console.error('Failed to load articles:', error);
+                    console.error('Failed to load articles from API:', error);
                     throw error;
                 }
             }

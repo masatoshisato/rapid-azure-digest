@@ -1,0 +1,34 @@
+{
+  "name": "rapid-azure-digest-scripts",
+  "version": "1.0.0",
+  "description": "GitHub Actions scripts for RSS news processing",
+  "main": "update-news.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/update-news.js",
+    "update-news": "ts-node update-news.ts",
+    "dev": "npm run update-news",
+    "check-env": "node -e \"require('dotenv').config({path: '../.env'}); console.log('GROQ_API_KEY:', process.env.GROQ_API_KEY ? 'gsk_...(設定済み)' : '❌ 未設定'); console.log('COSMOS_DB_ENDPOINT:', process.env.COSMOS_DB_ENDPOINT || '❌ 未設定'); console.log('COSMOS_DB_KEY:', process.env.COSMOS_DB_KEY ? '****(設定済み)' : '❌ 未設定');\"",
+    "test": "npm run update-news"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.9.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.5",
+    "feedparser": "^2.2.10",
+    "groq-sdk": "^0.7.0",
+    "node-fetch": "^2.7.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/feedparser": "^2.2.2",
+    "@types/node": "^20.0.0",
+    "@types/node-fetch": "^2.6.11",
+    "@types/xml2js": "^0.4.14",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

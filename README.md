@@ -1,6 +1,6 @@
-# Azure News Digest 📰
+# Azure Daily News Digest 📰
 
-AI翻訳によるAzure RSSニュースの日本語配信サービス。Azure Static Web Appsでホスティング。
+AI要約によるAzure RSSニュースの配信サービス。Azure Static Web Apps + Azure Functions + Cosmos DB で構築。
 
 [![GitHub Actions](https://github.com/masatoshisato/rapid-azure-digest/workflows/Daily%20Azure%20News%20Update/badge.svg)](https://github.com/masatoshisato/rapid-azure-digest/actions)
 [![Azure Static Web Apps](https://img.shields.io/badge/Azure-Static%20Web%20Apps-blue?logo=microsoft-azure)](https://salmon-beach-0b86ff00f.4.azurestaticapps.net)
@@ -9,58 +9,295 @@ AI翻訳によるAzure RSSニュースの日本語配信サービス。Azure Sta
 
 **本番環境**: https://salmon-beach-0b86ff00f.4.azurestaticapps.net
 
+## 📁 プロジェクト構成
+
+```
+rapid-azure-digest/
+├── README.md                     # このファイル
+├── .env                          # 環境変数（共通）
+├── package.json                  # ワークスペース設定
+├── frontend/                     # フロントエンド
+│   ├── index.html               # メインアプリケーション
+│   └── README.md                # フロントエンド説明書
+├── api/                          # Azure Functions API
+│   ├── src/functions/
+│   │   └── articles.ts          # 記事取得API
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── host.json
+│   ├── local.settings.json
+│   └── README.md                # API説明書
+├── scripts/                      # 自動化スクリプト
+│   ├── update-news.ts           # RSS取得・AI要約・DB保存
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── README.md                # スクリプト説明書
+└── .github/workflows/            # CI/CD設定
+    └── update-news.yml          # 毎日のニュース更新
+```
+
 ## 🎯 主要機能
 
-### 🤖 AI翻訳・要約システム
-- **RSS フィード解析**: Microsoft Azure Updates の RSS を自動取得
-- **AI 翻訳・要約**: 高精度な日本語翻訳（Groq SDK + llama-3.3-70b-versatile）
-- **技術タグ抽出**: Azure サービス名・技術名の自動識別
-- **リンク抽出**: 関連ドキュメントリンクの自動収集
+### 🤖 AI要約・分析システム
+- **RSS フィード解析**: Microsoft Azure関連のRSSを自動取得
+- **AI 要約**: Groq SDK (llama-3.3-70b-versatile) による高精度な日本語要約
+- **重複除去**: タイトル・URL・日付による重複チェック
+- **Cosmos DB保存**: NoSQLデータベースでの永続化
 
 ### 🌐 Modern Web Interface
 - **レスポンシブデザイン**: モバイル・デスクトップ対応
-- **検索機能**: ファジー検索（Fuse.js）によるリアルタイム検索
-- **モーダル表示**: 記事詳細のポップアップ表示
-- **最新順表示**: 新しい記事が先頭に自動ソート
+- **REST API連携**: Azure Functions経由でのデータ取得
+- **リアルタイム表示**: 最新記事の自動表示
+- **モーダル表示**: 記事詳細のポップアップ
 
-### ⚡ 自動化 & インフラストラクチャ
-- **Azure Static Web Apps**: 高速で安全なホスティング
+### ⚡ Azure インフラストラクチャ
+- **Azure Static Web Apps**: フロントエンドホスティング
+- **Azure Functions**: サーバーレスAPI
+- **Azure Cosmos DB**: NoSQLデータベース
 - **GitHub Actions**: 毎日自動更新（午前0時 JST）
-- **Infrastructure as Code**: Bicep テンプレートによるインフラ管理
-- **CI/CD**: 自動テスト・ビルド・デプロイ
 
 ## 🚀 クイックスタート
 
-### デモサイトへアクセス
-1. **本番サイト**: https://salmon-beach-0b86ff00f.4.azurestaticapps.net
-2. 最新のAzureニュースを日本語で確認
-3. 検索バーでキーワード検索
-4. 記事をクリックして詳細表示
+## 🚀 クイックスタート
 
-### ローカル開発環境
-
-#### 前提条件
+### 前提条件
 - Node.js 20+ (LTS推奨)
-- TypeScript
+- Azure アカウント
 - Groq API キー
 
-#### セットアップ
+### 環境設定
 ```bash
 # リポジトリをクローン
 git clone https://github.com/masatoshisato/rapid-azure-digest.git
 cd rapid-azure-digest
 
-# 依存関係をインストール
-npm install
-
 # 環境変数を設定
 cp .env.example .env
-# .env ファイルに GROQ_API_KEY を設定
+# .env ファイルにAPIキーとAzureリソース情報を設定
+
+# ワークスペースの依存関係をインストール
+npm run install-all
 ```
 
-#### 環境変数
+### ローカル開発
+
+### ローカル開発
+
+#### 重要: Node.js バージョン設定
+
+**Azure Functions Core Tools v4はNode.js v20が必須です**
+
+**自動化（推奨）:**
 ```bash
+# プロジェクトに含まれる自動化スクリプトを使用
+npm run dev  # 自動的にNode.js v20を使用してSWA起動
+```
+
+**手動設定:**
+```bash
+# 現在のNode.jsバージョンを確認
+node --version
+
+# Node.js v23.x の場合、v20に切り替えが必要
+export PATH="/usr/local/opt/node@20/bin:$PATH"
+
+# バージョン切り替えを確認
+node --version  # v20.x.x が表示されるはず
+```
+
+**📁 含まれる設定ファイル:**
+- `.nvmrc`: Node.js v20指定
+- `dev.sh`: Node.js v20自動設定スクリプト
+
+## 📰 RSS Update Script (scripts/update-news.ts) ローカル実行
+
+### 前提条件
+- Groq API Key (無料アカウント作成可能)
+- Node.js v20.20.0
+- Cosmos DB アクセスキー
+
+### 実行方法
+
+1. **環境変数の設定**
+```bash
+# .env ファイルに以下を追加 (他は設定済み)
+GROQ_API_KEY=your-groq-api-key-here
+```
+
+2. **スクリプトの実行**
+```bash
+# scripts ディレクトリに移動
+cd scripts
+
+# 依存関係のインストール (初回のみ)
+npm install
+
+# TypeScript 直接実行
+npm run update-news
+
+# または、コンパイルしてから実行
+npm run build
+npm start
+```
+
+3. **実行結果の確認**
+- コンソールに RSS 処理とAI要約のログが表示されます
+- Cosmos DB に記事データが保存されます
+- フロントエンド (http://localhost:4280) で新しい記事を確認できます
+
+### トラブルシューティング
+
+#### Groq API Key エラー
+```bash
+# .env ファイルを確認
+cat .env | grep GROQ
+
+# 正しくない場合は設定
+echo "GROQ_API_KEY=your-actual-key" >> .env
+```
+
+#### TypeScript 実行エラー
+```bash
+# scripts ディレクトリで再インストール
+cd scripts
+npm install
+
+# または ts-node をグローバルインストール
+npm install -g ts-node
+```
+
+**永続的な設定（推奨）**
+
+毎回の設定を避けるため、`.zshrc` または `.bash_profile` に追加：
+
+```bash
+# ~/.zshrc または ~/.bash_profile に追加
+export PATH="/usr/local/opt/node@20/bin:$PATH"
+
+# 設定を再読み込み
+source ~/.zshrc
+```
+
+#### フロントエンド + API の起動
+
+**方法1: 統合開発サーバー（推奨）**
+```bash
+# Node.js 20に設定済みの状態で
+cd /Users/sato/proj/rapid-azure-digest
+npm run dev
+
+# 起動成功メッセージ
+# "Azure Static Web Apps emulator started at http://localhost:4280"
+# "Mapped function route 'api/articles' [GET] to 'articles'"
+```
+
+**アクセス先:**
+- フロントエンド: http://localhost:4280
+- API: http://localhost:4280/api/articles
+
+**方法2: 個別起動**
+```bash
+# ターミナル1: API サーバー
+export PATH="/usr/local/opt/node@20/bin:$PATH"
+cd api
+npm start
+
+# ターミナル2: フロントエンド（別ターミナル）
+cd frontend
+python3 -m http.server 8080
+```
+
+#### トラブルシューティング
+
+**エラー: "Found Azure Functions Core Tools v4 which is incompatible"**
+
+```bash
+# Node.jsバージョン確認
+node --version
+
+# v23.x の場合は v20 に切り替え
+export PATH="/usr/local/opt/node@20/bin:$PATH"
+
+# 再度起動
+npm run dev
+```
+
+**エラー: "package.json parse error"**
+
+```bash
+# package.jsonの構文確認
+cat package.json | jq .
+
+# 依存関係の再インストール
+npm install
+```
+
+**API接続エラー**
+
+```bash
+# API動作確認
+curl -s http://localhost:4280/api/articles
+
+# デバッグログでCosmos DB接続確認
+# サーバーログでDEBUGメッセージを確認
+```
+
+#### 開発ワークフロー
+
+1. **環境設定**
+   ```bash
+   export PATH="/usr/local/opt/node@20/bin:$PATH"
+   cd /Users/sato/proj/rapid-azure-digest
+   ```
+
+2. **サーバー起動**
+   ```bash
+   npm run dev
+   ```
+
+3. **開発確認**
+   ```bash
+   # 新しいターミナルで
+   curl -s http://localhost:4280/api/articles | jq
+   open http://localhost:4280
+   ```
+
+4. **コード修正後の再コンパイル**
+   ```bash
+   # API修正時
+   cd api && npm run build
+   
+   # ブラウザで確認
+   # サーバー再起動は不要（ホットリロード）
+   ```
+
+#### ニュース更新スクリプト
+```bash
+# デフォルト実行
+npm run update-news
+
+# 個別実行
+cd scripts
+npm run update-news
+```
+
+### 環境変数
+
+`.env` ファイルに以下を設定：
+
+```bash
+# Groq API（AI要約用）
 GROQ_API_KEY=your_groq_api_key_here
+
+# Azure Cosmos DB
+COSMOS_DB_ENDPOINT=https://your-db.documents.azure.com:443/
+COSMOS_DB_KEY=your_cosmos_db_key
+COSMOS_DB_DATABASE_NAME=NewsDatabase
+COSMOS_DB_CONTAINER_NAME=Articles
+
+# Azure認証（オプション）
+AZURE_SUBSCRIPTION_ID=your_subscription_id
+AZURE_TENANT_ID=your_tenant_id
 ```
 
 ## 📖 使用方法

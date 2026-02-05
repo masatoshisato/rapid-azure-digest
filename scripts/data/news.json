@@ -1,0 +1,100 @@
+{
+  "lastUpdated": "2026-02-03T15:01:22.121Z",
+  "articles": [
+    {
+      "title": "Retirement: Azure Front Door and Azure CDN profiles will end support for DHE cipher suites on April 1, 2026",
+      "link": "https://azure.microsoft.com/updates?id=553527",
+      "description": "As part of our ongoing commitment to security, Azure Front Door (Standard, Premium, Classic) and Azure CDN from Microsoft (Classic) services will no longer support  weak cipher suites TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_DHE_RSA_WITH_AES_128_GCM_SH",
+      "japaneseTitle": "廃止: Azure Front Door と Azure CDN プロファイルは 2026 年 4 月 1 日に DHE 暗号スイートのサポートを終了する",
+      "japaneseDescription": "セキュリティへの取り組みの一環として、Azure Front Door (Standard、Premium、Classic) と Azure CDN from Microsoft (Classic) サービスは、弱い暗号スイートである TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 と TLS_DHE_RSA_WITH_AES_128_GCM_SHA384 のサポートを終了する。",
+      "technicalTags": [
+        "Azure Front Door",
+        "Azure CDN",
+        "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA384"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-02T18:15:39.000Z",
+      "id": "azure_553527"
+    },
+    {
+      "title": "[Launched] Generally Available: Serverless workspaces in Azure Databricks",
+      "link": "https://azure.microsoft.com/updates?id=550845",
+      "description": "Serverless workspaces in Azure Databricks are now generally available, offering a fully managed workspace type that comes preconfigured with serverless compute and default storage. They deliver an enterprise-ready SaaS experience with zero infrastructure",
+      "japaneseTitle": "一般提供開始: Azure Databricks のサーバーレス ワークスペース",
+      "japaneseDescription": "Azure Databricks のサーバーレス ワークスペースが一般提供開始され、事前に構成されたサーバーレス コンピューティングとデフォルトのストレージを備えたフルマネージド ワークスペース タイプを提供します。これにより、ゼロ インフラストラクチャでエンタープライズ レディの SaaS エクスペリエンスが実現します。",
+      "technicalTags": [
+        "Azure Databricks",
+        "Serverless"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-02T18:15:39.000Z",
+      "id": "azure_550845"
+    },
+    {
+      "title": "[Launched] Generally Available: Default Ruleset 2.2 in WAF for Azure Application Gateway",
+      "link": "https://azure.microsoft.com/updates?id=553532",
+      "description": "Announcing the general availability of Default Rule Set (DRS) 2.2 for Web Application Firewall on Azure Application Gateway.The Azure-managed DRS provides active protection against common web vulnerabilities and exploits. It also includes Microsoft Threat",
+      "japaneseTitle": "一般提供開始: Azure Application Gateway の Web Application Firewall で Default Ruleset 2.2",
+      "japaneseDescription": "Azure Application Gateway の Web Application Firewall で Default Rule Set (DRS) 2.2 が一般提供開始されました。Azure マネージドの DRS は、一般的な Web 脆弱性や悪用に対するアクティブな保護を提供し、Microsoft Threat Intelligence を含みます。",
+      "technicalTags": [
+        "Web Application Firewall",
+        "Azure Application Gateway",
+        "Default Rule Set"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-02T17:45:01.000Z",
+      "id": "azure_553532"
+    },
+    {
+      "title": "Retirement: \"Send data to Event Hubs & Storage (Preview)\" retiring July 31, 2026",
+      "link": "https://azure.microsoft.com/updates?id=551523",
+      "description": "On July 31, 2026, we'll\r\nretire preview feature “Send virtual machine client data to Event Hubs and\r\nStorage (Preview)” and it will no longer be supported by Microsoft. You will not\r\nbe able to create any new data collection rules using this feature, and any",
+      "japaneseTitle": "廃止: 「イベント ハブとストレージへのデータ送信 (プレビュー)」が 2026 年 7 月 31 日に廃止",
+      "japaneseDescription": "2026 年 7 月 31 日をもって、プレビュー機能「仮想マシンのクライアント データをイベント ハブとストレージ (プレビュー) に送信」が廃止され、Microsoft によるサポートが終了します。この機能を使用した新しいデータ収集ルールの作成はできなくなります。また、Azure Monitor Agent には影響ありませんが、イベント ハブを使用している場合は代替手段への移行が必要になります。",
+      "technicalTags": [
+        "Event Hubs",
+        "Azure Storage",
+        "Azure Monitor Agent"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-30T18:30:02.000Z",
+      "id": "azure_551523"
+    },
+    {
+      "title": "Retirement: Support for Python 3.10 ends on October 1, 2026 – upgrade your Azure Functions apps to Python 3.13",
+      "link": "https://azure.microsoft.com/updates?id=545771",
+      "description": "In alignment with the end of community support, on October 1, 2026, support for Python 3.10 in Azure Functions will end. Your\r\napps that are hosted on Functions will continue to run, but security updates\r\nand performance optimizations will no longer be avai",
+      "japaneseTitle": "廃止: Python 3.10 のサポートは 2026 年 10 月 1 日に終了 – Azure Functions アプリを Python 3.13 にアップグレード",
+      "japaneseDescription": "コミュニティのサポート終了に合わせて、2026 年 10 月 1 日に Azure Functions での Python 3.10 のサポートが終了します。Functions でホストされているアプリは引き続き実行されますが、セキュリティ更新とパフォーマンスの最適化は受けられなくなります。Python 3.13 へのアップグレードを検討してください。",
+      "technicalTags": [
+        "Python 3.10",
+        "Python 3.13",
+        "Azure Functions"
+      ],
+      "extractedLinks": [],
+      "date": "2026-01-28T23:15:47.000Z",
+      "id": "azure_545771"
+    },
+    {
+      "title": "[Launched] Generally Available: Model Context Protocol support in Azure API Management and Azure API Center",
+      "link": "https://azure.microsoft.com/updates?id=491990",
+      "description": "Announcing\r\nthe public preview of Model Context Protocol (MCP) support in Azure API\r\nManagement and Azure API Center. With this new capability, enterprises can\r\ntransform their existing APIs into dynamic, agent-ready tools, while improving\r\nsecurity and simpl",
+      "japaneseTitle": "一般提供開始: Azure API ManagementおよびAzure API CenterでのModel Context Protocolのサポート",
+      "japaneseDescription": "Azure API ManagementおよびAzure API CenterでのModel Context Protocol (MCP) のサポートが一般提供開始されました。この新しい機能により、企業は既存のAPIをダイナミックでエージェント対応のツールに変換しながら、セキュリティとシンプルさを向上させることができます。",
+      "technicalTags": [
+        "Azure API Management",
+        "Azure API Center",
+        "Model Context Protocol"
+      ],
+      "extractedLinks": [],
+      "date": "2025-05-23T15:00:30.000Z",
+      "id": "aHR0cHM6Ly9henVyZS5taWNyb3NvZnQu",
+      "_rid": "YNoFAL-sIg8BAAAAAAAAAA==",
+      "_self": "dbs/YNoFAA==/colls/YNoFAL-sIg8=/docs/YNoFAL-sIg8BAAAAAAAAAA==/",
+      "_etag": "\"5000f770-0000-2300-0000-69820cef0000\"",
+      "_attachments": "attachments/",
+      "_ts": 1770130671
+    }
+  ]
+}
