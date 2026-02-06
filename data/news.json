@@ -1,6 +1,47 @@
 {
-  "lastUpdated": "2026-02-05T15:15:29.049Z",
+  "lastUpdated": "2026-02-06T15:14:54.889Z",
   "articles": [
+    {
+      "title": "[Launched] Generally Available: AMD v6 confidential VMs in new regions for January 2026",
+      "link": "https://azure.microsoft.com/updates?id=553966",
+      "description": "DCa/ECa v6 series AMD based confidential virtual machines are now generally available in 11 new regions: Canada Central, Canada East, Norway East, Norway West, Italy North, Germany North, France South, Australia East, West US, West US 3, Germany West Cent",
+      "japaneseTitle": "一般提供開始: AMD v6 コンフィデンシャル VM が新しいリージョンで利用可能に (2026 年 1 月)",
+      "japaneseDescription": "DCa/ECa v6 シリーズの AMD ベースのコンフィデンシャル仮想マシンが、カナダ中部、カナダ東部、ノルウェー東部、ノルウェー西部、イタリア北部、ドイツ北部、フランス南部、オーストラリア東部、米国西部、米国西部 3、ドイツ西部中央の 11 の新しいリージョンで一般提供開始されました。",
+      "technicalTags": [
+        "AMD",
+        "confidential virtual machines",
+        "DCa/ECa v6 series"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-06T01:00:02.000Z"
+    },
+    {
+      "title": "[In preview] Public Preview: Azure virtual network routing appliance",
+      "link": "https://azure.microsoft.com/updates?id=555944",
+      "description": "Azure Virtual\r\nNetwork routing appliance offers private connectivity\r\nfor workloads across virtual networks. Using specialized\r\nhardware, it delivers low latency and\r\nhigh throughput, and optimal performance compared\r\nto virtual machines.   Deployed into priva",
+      "japaneseTitle": "プレビュー: Azure 仮想ネットワーク ルーティング アプライアンス",
+      "japaneseDescription": "Azure 仮想ネットワーク ルーティング アプライアンスは、仮想ネットワーク間のワークロードに対してプライベート接続を提供します。専用ハードウェアを使用して、低遅延と高スループットを実現し、仮想マシンに比べて最適なパフォーマンスを提供します。このアプライアンスはプライベートにデプロイされ、仮想ネットワーク間のトラフィックを効率的にルーティングできます。",
+      "technicalTags": [
+        "Azure Virtual Network",
+        "ルーティング アプライアンス"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-05T21:45:03.000Z"
+    },
+    {
+      "title": "[In preview] Public Preview: Claude Opus 4.6, Available on Microsoft Foundry",
+      "link": "https://azure.microsoft.com/updates?id=555870",
+      "description": "Claude Opus 4.6 is now available in Microsoft Foundry, bringing Anthropic’s most advanced reasoning model to a secure, enterprise-ready platform built on Azure. With support for complex coding, knowledge work, and agent-driven workflows, including long-co",
+      "japaneseTitle": "プレビュー: Claude Opus 4.6、Microsoft Foundryで利用可能",
+      "japaneseDescription": "Claude Opus 4.6がMicrosoft Foundryで利用可能になり、Anthropicの最も高度な推論モデルがAzureを基盤とするセキュアでエンタープライズ向けのプラットフォームで利用できるようになりました。複雑なコーディング、知識作業、エージェント駆動のワークフローなど、包括的な機能をサポートしています。",
+      "technicalTags": [
+        "Microsoft Foundry",
+        "Azure",
+        "Anthropic"
+      ],
+      "extractedLinks": [],
+      "date": "2026-02-05T18:30:32.000Z"
+    },
     {
       "title": "[In preview] Public Preview: Azure NetApp Files Elastic zone-redundant service level",
       "link": "https://azure.microsoft.com/updates?id=550863",
