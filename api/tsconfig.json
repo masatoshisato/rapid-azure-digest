@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "ES2018",
     "lib": ["ES2018"],
+    "types": ["node"],
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -20,7 +21,8 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": ".",
+    "rootDir": "./src/functions",
+    "outDir": "./dist",
     "sourceMap": true
   },
   "include": [
@@ -28,6 +30,6 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "*.d.ts"
   ]
 }
