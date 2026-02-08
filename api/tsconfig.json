@@ -21,7 +21,7 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "rootDir": "./src/functions",
+    "rootDir": "./src",
     "outDir": "./dist",
     "sourceMap": true
   },
