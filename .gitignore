@@ -63,3 +63,6 @@ build/
 
 # Optional eslint cache
 .eslintcache
+
+# Azure Functions
+local.settings.json
