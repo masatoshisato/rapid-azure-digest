@@ -2,7 +2,6 @@
   "name": "azure-news-api",
   "version": "1.0.0",
   "description": "Azure Static Web Apps API for Cosmos DB news data",
-  "main": "dist/functions/articles.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
@@ -20,7 +19,5 @@
     "rimraf": "^5.0.0",
     "typescript": "^5.0.0"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+  "main": "dist/{index.js,functions/*.js}"
 }

@@ -3,20 +3,14 @@
   "version": "1.0.0",
   "description": "Azure Daily News Digest - RSS aggregation and AI summarization",
   "private": true,
-  "workspaces": [
-    "api",
-    "scripts"
-  ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "start": "npm run start --workspace=api",
+    "start": "cd api && npm run start",
     "dev": "./dev.sh",
-    "update-news": "npm run update-news --workspace=scripts",
-    "install-all": "npm install --workspaces",
-    "clean": "npm run clean --workspaces --if-present",
-    "help": "echo '🚀 Quick Commands:' && echo '  npm run dev     - Start development server' && echo '  npm run build   - Build all projects' && echo '  npm run update-news - Update RSS news' && echo '' && echo '📖 Documentation:' && echo '  README.md - Full documentation' && echo '  LOCAL_DEVELOPMENT.md - Quick reference' && echo '' && echo '⚠️  Node.js v20 required! Run: export PATH=\"/usr/local/opt/node@20/bin:$PATH\"'",
-    "check-node": "node --version && echo 'Node.js version check completed. Required: v20.x.x'",
-    "postinstall-disabled": "npm run install-all"
+    "update-news": "cd scripts && npm run update-news",
+    "build-api": "cd api && npm run build",
+    "build-scripts": "cd scripts && npm run build",
+    "help": "echo '🚀 Quick Commands:' && echo '  npm run dev     - Start development server' && echo '  npm run build-api   - Build API' && echo '  npm run build-scripts - Build scripts' && echo '  npm run update-news - Update RSS news' && echo '' && echo '📖 Documentation:' && echo '  README.md - Full documentation' && echo '  LOCAL_DEVELOPMENT.md - Quick reference' && echo '' && echo '⚠️  Node.js v20 required! Run: export PATH=\"/usr/local/opt/node@20/bin:$PATH\"'",
+    "check-node": "node --version && echo 'Node.js version check completed. Required: v20.x.x'"
   },
   "keywords": ["azure", "rss", "news", "ai", "summary"],
   "author": "",

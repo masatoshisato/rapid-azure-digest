@@ -1,6 +1,6 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { CosmosClient } from '@azure/cosmos';
-import { ProductionLogger } from '../utils/logger';
+import { ProductionLogger } from './logger';
 
 export async function articles(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     const logger = new ProductionLogger(context);
