@@ -1,11 +1,11 @@
-# Scripts - 自動化スクリプト
+# Update-DB - 自動化スクリプト
 
 ニュース更新・データチェック・運用監視のための自動化スクリプト群です。GitHub ActionsやローカルCLIから実行可能です。
 
 ## 📁 ファイル構成
 
 ```
-scripts/
+update-db/
 ├── update-news.ts          # メインスクリプト: RSS→AI要約→DB保存
 ├── check-cosmos.ts         # Cosmos DB 接続・データ確認
 ├── check-urls.ts           # URL有効性チェック
@@ -196,8 +196,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: cd scripts && npm install
-      - run: cd scripts && npm run update-news
+      - run: cd update-db && npm install
+      - run: cd update-db && npm run update-news
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           COSMOS_DB_ENDPOINT: ${{ secrets.COSMOS_DB_ENDPOINT }}

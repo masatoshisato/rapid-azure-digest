@@ -592,7 +592,7 @@ async function main() {
 
 function printUsage(): void {
   console.log(`
-使用方法: npx tsx scripts/update-news.ts [OPTIONS] [LIMIT]
+使用方法: npx tsx update-db/update-news.ts [OPTIONS] [LIMIT]
 
 OPTIONS:
   --debug, -d              Debugレベルのログを出力 (詳細情報表示)
@@ -603,11 +603,11 @@ ARGUMENTS:
   LIMIT                    処理する記事数の上限 (デフォルト: 100件, 0で全件処理)
 
 例:
-  npx tsx scripts/update-news.ts                    # 100件をINFOレベルで処理
-  npx tsx scripts/update-news.ts 5                  # 最初の5件をINFOレベルで処理  
-  npx tsx scripts/update-news.ts 0                  # 全記事を処理 (Rate limitに注意)
-  npx tsx scripts/update-news.ts --debug 3          # 最初の3件をDEBUGレベルで処理
-  npx tsx scripts/update-news.ts --log-level DEBUG  # 100件をDEBUGレベルで処理
+  npx tsx update-db/update-news.ts                    # 100件をINFOレベルで処理
+  npx tsx update-db/update-news.ts 5                  # 最初の5件をINFOレベルで処理  
+  npx tsx update-db/update-news.ts 0                  # 全記事を処理 (Rate limitに注意)
+  npx tsx update-db/update-news.ts --debug 3          # 最初の3件をDEBUGレベルで処理
+  npx tsx update-db/update-news.ts --log-level DEBUG  # 100件をDEBUGレベルで処理
 `);
 }
 

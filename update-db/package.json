@@ -1,7 +1,7 @@
 {
-  "name": "rapid-azure-digest-scripts",
+  "name": "rapid-azure-digest-update-db",
   "version": "1.0.0",
-  "description": "GitHub Actions scripts for RSS news processing",
+  "description": "GitHub Actions update-db scripts for RSS news processing",
   "main": "update-news.ts",
   "scripts": {
     "build": "tsc",
