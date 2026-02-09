@@ -5,7 +5,7 @@ node_modules/
 
 # TypeScript設定・ビルドファイル
 tsconfig.json
-update-db/
+update-articles/
 infrastructure/
 
 # ドキュメント・設定ファイル

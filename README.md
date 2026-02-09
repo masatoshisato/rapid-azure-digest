@@ -37,10 +37,10 @@ Azure関連ニュースを自動収集・AI要約してWebサイト配信する�
 │   ├── host.json         # Azure Functions設定
 │   ├── local.settings.json.example  # 設定テンプレート
 │   └── README.md         # API詳細
-├── update-db/            # データ更新スクリプト
-│   ├── update-news.ts    # RSS→AI要約→DB保存
-│   ├── check-cosmos.ts   # DB接続確認
-│   └── README.md         # データ管理詳細
+├── update-articles/        # データ更新スクリプト
+│   ├── update-articles.ts  # RSS→AI要約→DB保存
+│   ├── check-cosmos.ts     # DB接続確認
+│   └── README.md           # データ管理詳細
 ├── infrastructure/       # Azure リソース定義
 │   ├── cosmosdb.bicep    # Cosmos DB Bicep
 │   └── staticwebapp.bicep # SWA Bicep
@@ -142,8 +142,8 @@ swa start            # 統合開発環境起動
 swa deploy           # 本番デプロイ
 
 # データ更新
-cd update-db
-npm run update-news  # ニュース更新実行
+cd update-articles
+npm run update-articles  # ニュース更新実行
 ```
 
 ## 🚨 トラブルシューティング

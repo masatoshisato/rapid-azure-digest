@@ -1,12 +1,12 @@
-# Update-DB - 自動化スクリプト
+# Update-Articles - 自動化スクリプト
 
 ニュース更新・データチェック・運用監視のための自動化スクリプト群です。GitHub ActionsやローカルCLIから実行可能です。
 
 ## 📁 ファイル構成
 
 ```
-update-db/
-├── update-news.ts          # メインスクリプト: RSS→AI要約→DB保存
+update-articles/
+├── update-articles.ts      # メインスクリプト: RSS→AI要約→DB保存
 ├── check-cosmos.ts         # Cosmos DB 接続・データ確認
 ├── check-urls.ts           # URL有効性チェック
 ├── check-workflow-result.sh # GitHub Actions 結果確認
@@ -19,7 +19,7 @@ update-db/
 
 ## 🚀 主要スクリプト
 
-### 1. update-news.ts - ニュース更新エンジン
+### 1. update-articles.ts - ニュース更新エンジン
 
 **機能**:
 - 複数RSS フィードから Azure関連記事を自動取得
@@ -29,7 +29,7 @@ update-db/
 
 **実行方法**:
 ```bash
-cd scripts
+cd update-articles
 
 # 依存関係インストール
 npm install
@@ -42,7 +42,7 @@ export COSMOS_DB_DATABASE_NAME="NewsDatabase"
 export COSMOS_DB_CONTAINER_NAME="Articles"
 
 # スクリプト実行
-npm run update-news
+npm run update-articles
 ```
 
 **処理フロー**:
@@ -180,7 +180,7 @@ const completion = await groq.chat.completions.create({
 
 ## 📅 自動実行設定 (GitHub Actions)
 
-### ワークフロー設定 (.github/workflows/update-news.yml)
+### ワークフロー設定 (.github/workflows/update-articles.yml)
 ```yml
 name: Daily Azure News Update
 on:
@@ -189,15 +189,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-news:
+  update-articles:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: cd update-db && npm install
-      - run: cd update-db && npm run update-news
+      - run: cd update-articles && npm install
+      - run: cd update-articles && npm run update-articles
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           COSMOS_DB_ENDPOINT: ${{ secrets.COSMOS_DB_ENDPOINT }}
@@ -222,7 +222,7 @@ Repository Settings → Secrets and variables → Actions
 
 ### セットアップ
 ```bash
-cd scripts
+cd update-articles
 
 # 依存関係インストール
 npm install
@@ -231,12 +231,12 @@ npm install
 npx tsc
 
 # ローカル実行
-npm run update-news
+npm run update-articles
 ```
 
 ### デバッグモード
 ```typescript
-// update-news.ts でデバッグログ有効化
+// update-articles.ts でデバッグログ有効化
 const DEBUG = true;
 
 if (DEBUG) {

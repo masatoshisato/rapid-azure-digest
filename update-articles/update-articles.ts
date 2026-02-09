@@ -83,6 +83,7 @@ class AzureNewsProcessor {
   private dataDir: string;
   private dataFile: string;
   private rssUrl: string = 'https://www.microsoft.com/releasecommunications/api/v2/azure/rss';
+  private retentionDays: number; // 記事保持期間（日数）
 
   constructor() {
     this.groq = new Groq({
@@ -94,6 +95,10 @@ class AzureNewsProcessor {
     const key = process.env.COSMOS_DB_KEY;
     const databaseName = process.env.COSMOS_DB_DATABASE_NAME || 'NewsDatabase';
     const containerName = process.env.COSMOS_DB_CONTAINER_NAME || 'Articles';
+
+    // 記事保持期間の設定（環境変数から読み込み、デフォルトは30日）
+    this.retentionDays = parseInt(process.env.ARTICLE_RETENTION_DAYS || '30', 10);
+    Logger.info(`✅ 記事保持期間: ${this.retentionDays}日 (${this.retentionDays}日より古い記事は削除されます)`);
 
     if (!endpoint || !key) {
       throw new Error('Cosmos DB endpoint and key must be provided in environment variables');
@@ -270,7 +275,7 @@ class AzureNewsProcessor {
       
       const { resources: articles } = await this.container.items.query<NewsItem>(querySpec).fetchAll();
       
-      // 365日以内の記事をフィルタリング
+      // 保持期間内の記事をフィルタリング
       const recentArticles = this.filterRecentArticles(articles);
       Logger.debug(`Loaded ${articles.length} articles from Cosmos DB, ${recentArticles.length} are recent (within 365 days)`);
       
@@ -292,7 +297,7 @@ class AzureNewsProcessor {
         const data = fs.readFileSync(this.dataFile, 'utf-8');
         const parsedData = JSON.parse(data);
         
-        // 読み込み時に古いデータ（365日以前）を削除
+        // 読み込み時に古いデータ（保持期間外）を削除
         const recentArticles = this.filterRecentArticles(parsedData.articles || []);
         Logger.debug(`Loaded ${parsedData.articles?.length || 0} articles from file, ${recentArticles.length} are recent (within 365 days)`);
         
@@ -372,7 +377,7 @@ class AzureNewsProcessor {
 
   private filterRecentArticles(articles: NewsItem[]): NewsItem[] {
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 365); // 365日前
+    cutoffDate.setDate(cutoffDate.getDate() - this.retentionDays);
 
     return articles.filter(article => {
       const articleDate = new Date(article.date);
@@ -382,12 +387,62 @@ class AzureNewsProcessor {
 
   private filterRecentRSSItems(rssItems: any[]): any[] {
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 365); // 365日前
+    cutoffDate.setDate(cutoffDate.getDate() - this.retentionDays);
 
     return rssItems.filter(item => {
       const itemDate = new Date(item.pubDate || item.isoDate || new Date());
       return itemDate >= cutoffDate;
     });
+  }
+
+  /**
+   * 保持期間を過ぎた古い記事をCosmos DBから削除する
+   */
+  private async deleteOldArticles(): Promise<number> {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - this.retentionDays);
+      const cutoffDateISO = cutoffDate.toISOString();
+
+      Logger.info(`🗑️ ${this.retentionDays}日より古い記事の削除を開始します (基準日: ${cutoffDate.toLocaleDateString('ja-JP')})`);
+
+      // 古い記事を検索
+      const query = "SELECT c.id, c.title, c.date FROM c WHERE c.date < @cutoffDate";
+      const { resources: oldArticles } = await this.container.items
+        .query({
+          query,
+          parameters: [
+            { name: "@cutoffDate", value: cutoffDateISO }
+          ]
+        })
+        .fetchAll();
+
+      if (oldArticles.length === 0) {
+        Logger.info('✅ 削除対象の古い記事はありません');
+        return 0;
+      }
+
+      Logger.info(`🔍 削除対象の記事: ${oldArticles.length}件`);
+
+      // 古い記事を1件ずつ削除
+      let deletedCount = 0;
+      for (const article of oldArticles) {
+        try {
+          await this.container.item(article.id, article.id).delete();
+          deletedCount++;
+          Logger.debug(`🗑️ 削除: "${article.title}" (発行日: ${new Date(article.date).toLocaleDateString('ja-JP')})`);
+        } catch (error) {
+          Logger.info(`⚠️ 記事削除エラー [${article.id}]: ${error}`);
+        }
+      }
+
+      Logger.info(`🗑️ 古い記事削除完了: ${deletedCount}件 / ${oldArticles.length}件`);
+      return deletedCount;
+
+    } catch (error) {
+      Logger.info(`❌ 古い記事削除エラー: ${error}`);
+      return 0;
+    }
   }
 
   async processUpdates(limitCount: number = 100): Promise<void> {
@@ -408,12 +463,12 @@ class AzureNewsProcessor {
       
       Logger.info(`RSS取得完了: ${rssItems.length}件の記事を取得`);
 
-      // 事前に365日以内の記事のみフィルタリング（古い記事の処理を回避）
+      // 事前に保持期間内の記事のみフィルタリング（古い記事の処理を回避）
       const recentRssItems = this.filterRecentRSSItems(rssItems);
-      Logger.info(`365日以内の記事: ${recentRssItems.length}件 (古い記事${rssItems.length - recentRssItems.length}件を除外)`);
+      Logger.info(`${this.retentionDays}日以内の記事: ${recentRssItems.length}件 (古い記事${rssItems.length - recentRssItems.length}件を除外)`);
       
       if (recentRssItems.length === 0) {
-        Logger.info('処理対象の記事がありません (全て365日以上前の古い記事)');
+        Logger.info(`処理対象の記事がありません (全て${this.retentionDays}日以上前の古い記事)`);
         return;
       }
 
@@ -483,10 +538,20 @@ class AzureNewsProcessor {
       if (newArticles.length === 0) {
         Logger.info('処理対象の新しい記事がありませんでした');
         Logger.info(`スキップした記事: ${skipped}件 (既存)`);
+        
+        // 新しい記事が無くても古い記事の削除は実行する
+        Logger.info('=== 古い記事の削除処理 ===');
+        const deletedCount = await this.deleteOldArticles();
+        
+        Logger.info('=== 処理結果サマリー ===');
+        Logger.info(`新規処理記事: 0件`);
+        Logger.info(`スキップ記事: ${skipped}件 (既存)`);
+        Logger.info(`削除記事: ${deletedCount}件 (${this.retentionDays}日以上経過)`);
+        Logger.info(`総保存記事数: ${existingData.articles.length}件 (削除前)`);
         return;
       }
       
-      // 新しい記事を既存データに追加（既に両方とも365日フィルタ済み）
+      // 新しい記事を既存データに追加（既に両方とも保持期間フィルタ済み）
       const allArticles = [...existingData.articles, ...newArticles];
       
       // 日付の降順でソート（新しい記事が先頭に）
@@ -506,9 +571,15 @@ class AzureNewsProcessor {
       const processingTimeSec = Math.round(processingTimeMs / 1000);
       
       Logger.info('書き込み完了');
+      
+      // 古い記事を削除
+      Logger.info('=== 古い記事の削除処理 ===');
+      const deletedCount = await this.deleteOldArticles();
+      
       Logger.info('=== 処理結果サマリー ===');
       Logger.info(`新規処理記事: ${processed}件`);
       Logger.info(`スキップ記事: ${skipped}件 (既存)`);
+      Logger.info(`削除記事: ${deletedCount}件 (${this.retentionDays}日以上経過)`);
       Logger.info(`総保存記事数: ${allArticles.length}件`);
       Logger.info(`処理終了時刻: ${Logger.getCurrentTime()}`);
       Logger.info(`総処理時間: ${processingTimeSec}秒 (${Math.floor(processingTimeSec/60)}分${processingTimeSec%60}秒)`);

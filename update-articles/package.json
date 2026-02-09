@@ -1,15 +1,15 @@
 {
-  "name": "rapid-azure-digest-update-db",
+  "name": "rapid-azure-digest-update-articles",
   "version": "1.0.0",
-  "description": "GitHub Actions update-db scripts for RSS news processing",
-  "main": "update-news.ts",
+  "description": "GitHub Actions update-articles scripts for RSS news processing",
+  "main": "update-articles.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/update-news.js",
-    "update-news": "ts-node update-news.ts",
-    "dev": "npm run update-news",
+    "start": "node dist/update-articles.js",
+    "update-articles": "ts-node update-articles.ts",
+    "dev": "npm run update-articles",
     "check-env": "node -e \"require('dotenv').config({path: '../.env'}); console.log('GROQ_API_KEY:', process.env.GROQ_API_KEY ? 'gsk_...(設定済み)' : '❌ 未設定'); console.log('COSMOS_DB_ENDPOINT:', process.env.COSMOS_DB_ENDPOINT || '❌ 未設定'); console.log('COSMOS_DB_KEY:', process.env.COSMOS_DB_KEY ? '****(設定済み)' : '❌ 未設定');\"",
-    "test": "npm run update-news"
+    "test": "npm run update-articles"
   },
   "dependencies": {
     "@azure/cosmos": "^4.9.0",
