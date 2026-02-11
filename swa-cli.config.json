@@ -7,7 +7,9 @@
       "outputLocation": ".",
       "apiLanguage": "node",
       "apiVersion": "20",
-      "apiBuildCommand": "cd api && npm install && npm run build"
+      "apiBuildCommand": "cd api && npm install && npm run build",
+      "appName": "rapid-azure-digest",
+      "resourceGroup": "DailyAzureNewsUpdate"
     }
   }
 }

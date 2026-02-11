@@ -5,77 +5,10 @@ import { Groq } from 'groq-sdk';
 import fs from 'fs';
 import path from 'path';
 import { CosmosClient, Container, Database } from '@azure/cosmos';
-import dotenv from 'dotenv';
+import crypto from 'crypto';
+import { Logger, CustomRSSItem, NewsItem, StoredData, ProcessingSummary } from './types';
 
-// 環境変数を読み込み（プロジェクトルートの .env ファイルを指定）
-dotenv.config({ path: '../.env' });
-
-// ログレベル定義
-enum LogLevel {
-  DEBUG = 'DEBUG',
-  INFO = 'INFO'
-}
-
-// ログ管理クラス
-class Logger {
-  private static logLevel: LogLevel = LogLevel.INFO;
-  
-  static setLevel(level: LogLevel): void {
-    this.logLevel = level;
-  }
-  
-  static debug(message: string, ...args: any[]): void {
-    if (this.logLevel === LogLevel.DEBUG) {
-      console.log(`[DEBUG] ${message}`, ...args);
-    }
-  }
-  
-  static info(message: string, ...args: any[]): void {
-    console.log(`[INFO] ${message}`, ...args);
-  }
-  
-  static error(message: string, ...args: any[]): void {
-    console.error(`[ERROR] ${message}`, ...args);
-  }
-  
-  static getCurrentTime(): string {
-    return new Date().toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  }
-}
-
-interface CustomRSSItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  description: string;
-}
-
-interface NewsItem {
-  id?: string; // Cosmos DB用のユニークID
-  title: string;
-  link: string;
-  description: string;
-  japaneseTitle: string;
-  japaneseDescription: string;
-  technicalTags: string[];
-  extractedLinks: string[];
-  date: string;
-}
-
-interface StoredData {
-  lastUpdated: string;
-  articles: NewsItem[];
-}
-
-class AzureNewsProcessor {
+export class AzureNewsProcessor {
   private groq: Groq;
   private cosmosClient: CosmosClient;
   private database: Database;
@@ -108,14 +41,9 @@ class AzureNewsProcessor {
     this.database = this.cosmosClient.database(databaseName);
     this.container = this.database.container(containerName);
     
-    // 後方互換性のためのファイル設定（必要に応じて）
-    this.dataDir = path.join(process.cwd(), 'data');
-    this.dataFile = path.join(this.dataDir, 'news.json');
-    
-    // データディレクトリを作成
-    if (!fs.existsSync(this.dataDir)) {
-      fs.mkdirSync(this.dataDir, { recursive: true });
-    }
+    // Azure Functions環境ではローカルファイニ不要（Cosmos DBを使用）
+    this.dataDir = '';
+    this.dataFile = '';
   }
 
   async fetchRSSFeed(): Promise<CustomRSSItem[]> {
@@ -239,7 +167,7 @@ class AzureNewsProcessor {
       
       try {
         // JSON文字列内の全角引用符を半角に置換してからパース
-        const normalizedJson = jsonText.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+        const normalizedJson = jsonText.replace(/[""]/g, '"').replace(/['']/g, "'");
         Logger.debug('Normalized JSON length:', normalizedJson.length);
         const result = JSON.parse(normalizedJson);
         return {
@@ -277,7 +205,7 @@ class AzureNewsProcessor {
       
       // 保持期間内の記事をフィルタリング
       const recentArticles = this.filterRecentArticles(articles);
-      Logger.debug(`Loaded ${articles.length} articles from Cosmos DB, ${recentArticles.length} are recent (within 365 days)`);
+      Logger.debug(`Loaded ${articles.length} articles from Cosmos DB, ${recentArticles.length} are recent (within retention period)`);
       
       return {
         lastUpdated: new Date().toISOString(),
@@ -286,93 +214,45 @@ class AzureNewsProcessor {
     } catch (error) {
       Logger.error('Error loading data from Cosmos DB:', error);
       
-      // フォールバック: ファイルからデータを読み込む
-      return this.loadExistingDataFromFile();
+      // Azure Functions環境ではファイルフォールバック無効、空データを返す
+      Logger.info('Cosmos DB読み込み失敗時は空데이터で開始します');
+      return {
+        lastUpdated: new Date().toISOString(),
+        articles: []
+      };
     }
   }
 
+  // Azure Functions環境では不要になったメソッド（Cosmos DBのみ使用）
   private loadExistingDataFromFile(): StoredData {
-    try {
-      if (fs.existsSync(this.dataFile)) {
-        const data = fs.readFileSync(this.dataFile, 'utf-8');
-        const parsedData = JSON.parse(data);
-        
-        // 読み込み時に古いデータ（保持期間外）を削除
-        const recentArticles = this.filterRecentArticles(parsedData.articles || []);
-        Logger.debug(`Loaded ${parsedData.articles?.length || 0} articles from file, ${recentArticles.length} are recent (within 365 days)`);
-        
-        return {
-          lastUpdated: parsedData.lastUpdated || new Date().toISOString(),
-          articles: recentArticles
-        };
-      }
-    } catch (error) {
-      Logger.error('Error loading existing data from file:', error);
-    }
-    
+    // Azure Functions環境ではローカルファイルアクセスを無効化
+    Logger.info('ローカルファイルアクセスは Azure Functions では無効です');
     return {
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(), 
       articles: []
     };
   }
 
-  private async saveData(data: StoredData): Promise<void> {
-    try {
-      // 新しい記事をCosmos DBに保存
-      for (const article of data.articles) {
-        if (!article.id) {
-          // リンクをベースにしたユニークIDを生成
-          article.id = this.generateArticleId(article.link);
-        }
-        
-        try {
-          // upsert（存在しない場合は作成、存在する場合は更新）
-          await this.container.items.upsert(article);
-          Logger.debug(`Saved article to Cosmos DB: ${article.title}`);
-        } catch (dbError) {
-          Logger.error(`Error saving article to Cosmos DB:`, dbError);
-          // 個別のエラーでも続行
-        }
-      }
-      
-      Logger.info(`Data saved to Cosmos DB: ${data.articles.length} articles`);
-      
-      // 後方互換性のためにファイルにも保存
-      await this.saveDataToFile(data);
-      
-    } catch (error) {
-      Logger.error('Error saving data to Cosmos DB:', error);
-      // フォールバック: ファイルに保存
-      await this.saveDataToFile(data);
-      throw error;
-    }
-  }
-
-  private async saveDataToFile(data: StoredData): Promise<void> {
-    try {
-      fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
-      Logger.debug(`Data saved to file: ${this.dataFile}`);
-    } catch (error) {
-      Logger.error('Error saving data to file:', error);
-      throw error;
-    }
-  }
-
-  private generateArticleId(link: string): string {
-    // URLからクエリパラメータのIDを抽出してユニークIDを生成
+  private generateUniqueId(link: string): string {
+    // タイムスタンプ + URL ハッシュで確実にユニークなIDを生成
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const linkHash = crypto.createHash('md5').update(link).digest('hex').slice(0, 16);
+    
     try {
       const url = new URL(link);
-      const urlId = url.searchParams.get('id');
-      if (urlId) {
-        return `azure_${urlId}`;
+      // URLパスから意味のあるIDを作成
+      const pathParts = url.pathname.split('/').filter(part => part.length > 0);
+      if (pathParts.length > 0) {
+        const lastPart = pathParts[pathParts.length - 1];
+        const urlId = lastPart.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 20);
+        return `azure_${urlId}_${linkHash}`; // ハッシュを追加してユニーク性確保
       }
     } catch (error) {
-      // URLパースに失敗した場合のフォールバック
+      Logger.debug(`URL parsing failed for ${link}:`, error);
     }
     
-    // フォールバック: ハッシュベースのID生成
-    const crypto = require('crypto');
-    return crypto.createHash('md5').update(link).digest('hex').slice(0, 32);
+    // フォールバック: タイムスタンプ + ハッシュ
+    return `azure_article_${timestamp}_${linkHash}`;
   }
 
   private filterRecentArticles(articles: NewsItem[]): NewsItem[] {
@@ -445,93 +325,165 @@ class AzureNewsProcessor {
     }
   }
 
-  async processUpdates(limitCount: number = 100): Promise<void> {
+  async processUpdates(limitCount: number = 100): Promise<ProcessingSummary> {
     const startTime = new Date();
     Logger.info('=== Azure RSS ニュース処理開始 ===');
     Logger.info(`処理開始時刻: ${Logger.getCurrentTime()}`);
+    
+    // 統計情報の初期化
+    const summary: ProcessingSummary = {
+      success: false,
+      processingTimeMs: 0,
+      processingTimeSec: 0,
+      startTime: startTime.toISOString(),
+      endTime: '',
+      rssStats: {
+        totalRssItems: 0,
+        recentRssItems: 0,
+        excludedOldItems: 0,
+        processedItems: 0
+      },
+      articleStats: {
+        newArticles: 0,
+        skippedExisting: 0,
+        deletedOldArticles: 0,
+        totalStoredArticles: 0
+      },
+      databaseStats: {
+        cosmosDbOperations: 0,
+        successfulWrites: 0,
+        failedWrites: 0
+      },
+      aiStats: {
+        groqApiCalls: 0,
+        successfulTranslations: 0,
+        averageTranslationTimeMs: 0
+      },
+      configInfo: {
+        retentionDays: this.retentionDays,
+        limitCount: limitCount,
+        rssUrl: this.rssUrl
+      },
+      errorDetails: []
+    };
     
     try {
       // RSSフィードを取得
       Logger.info('RSSフィード取得開始...');
       Logger.info(`取得元URL: ${this.rssUrl}`);
       const rssItems = await this.fetchRSSFeed();
+      summary.rssStats.totalRssItems = rssItems.length;
       
       if (rssItems.length === 0) {
         Logger.info('RSSフィードから記事が見つかりませんでした');
-        return;
+        summary.endTime = new Date().toISOString();
+        summary.processingTimeMs = new Date().getTime() - startTime.getTime();
+        summary.processingTimeSec = Math.round(summary.processingTimeMs / 1000);
+        summary.success = true;
+        return summary;
       }
       
-      Logger.info(`RSS取得完了: ${rssItems.length}件の記事を取得`);
-
       // 事前に保持期間内の記事のみフィルタリング（古い記事の処理を回避）
       const recentRssItems = this.filterRecentRSSItems(rssItems);
+      summary.rssStats.recentRssItems = recentRssItems.length;
+      summary.rssStats.excludedOldItems = rssItems.length - recentRssItems.length;
       Logger.info(`${this.retentionDays}日以内の記事: ${recentRssItems.length}件 (古い記事${rssItems.length - recentRssItems.length}件を除外)`);
       
       if (recentRssItems.length === 0) {
         Logger.info(`処理対象の記事がありません (全て${this.retentionDays}日以上前の古い記事)`);
-        return;
+        summary.endTime = new Date().toISOString();
+        summary.processingTimeMs = new Date().getTime() - startTime.getTime();
+        summary.processingTimeSec = Math.round(summary.processingTimeMs / 1000);
+        summary.success = true;
+        return summary;
       }
-
-      // 処理件数を制限（デフォルト100件）
-      const itemsToProcess = recentRssItems.slice(0, limitCount);
       
+      // 制限を適用
+      const itemsToProcess = recentRssItems.slice(0, limitCount);
+      summary.rssStats.processedItems = itemsToProcess.length;
       Logger.info(`今回処理対象: 最初の${itemsToProcess.length}件 (制限: ${limitCount}件)`);
-      if (recentRssItems.length > limitCount) {
-        Logger.info(`注意: ${recentRssItems.length - limitCount}件の記事を切り捨てました（Rate limit対策）`);
-      }
       
       // 既存データを読み込み
       Logger.info('既存データを読み込み中...');
       const existingData = await this.loadExistingData();
-      const existingUrls = new Set(existingData.articles.map(a => a.link));
+      summary.articleStats.totalStoredArticles = existingData.articles.length;
+      
+      // 既存記事のリンク・ID・タイトルをセットに格納（重複チェック強化）
+      const existingLinks = new Set(existingData.articles.map(article => article.link));
+      const existingTitles = new Set(existingData.articles.map(article => article.title.trim().toLowerCase()));
       
       const newArticles: NewsItem[] = [];
+      Logger.info('記事の個別処理を開始...');
+      
       let processed = 0;
       let skipped = 0;
       
-      Logger.info('記事の個別処理を開始...');
-      
       for (const item of itemsToProcess) {
-        // 既に処理済みの記事はスキップ
-        if (existingUrls.has(item.link)) {
-          skipped++;
-          Logger.debug(`スキップ (既存): ${item.title}`);
-          continue;
-        }
-        
-        Logger.info(`処理中 (${processed + 1}/${itemsToProcess.length - skipped}): ${item.title.substring(0, 50)}${item.title.length > 50 ? '...' : ''}`);
-        Logger.debug(`RSS記事本文: ${item.description ? item.description.substring(0, 200) + (item.description.length > 200 ? '...' : '') : 'なし'}`);
-        Logger.debug(`記事URL: ${item.link}`);
-        Logger.debug(`公開日時: ${item.pubDate}`);
-        
-        // RSSの説明を使用 (フルコンテンツ取得は無効化)
-        const contentForAI = item.description;
-        Logger.debug(`AI処理用コンテンツ: ${contentForAI ? `${contentForAI.substring(0, 300)}${contentForAI.length > 300 ? '...' : ''}` : 'なし'}`);
-        
-        // 翻訳・要約処理
-        const translated = await this.translateAndSummarize(item.title, contentForAI);
-        
-        const newsItem: NewsItem = {
-          title: item.title,
-          link: item.link,
-          description: item.description || '',
-          japaneseTitle: translated.japaneseTitle,
-          japaneseDescription: translated.japaneseDescription,
-          technicalTags: translated.technicalTags,
-          extractedLinks: translated.extractedLinks || [], // AIが抽出したリンクのみ
-          date: item.pubDate || new Date().toISOString()
-        };
-        
-        newArticles.push(newsItem);
-        processed++;
-        
-        Logger.info(`処理完了 (${processed}/${itemsToProcess.length - skipped}): 技術タグ[${translated.technicalTags.slice(0, 3).join(', ')}${translated.technicalTags.length > 3 ? '...' : ''}]`);
-        
-        // レート制限（3秒間隔）
-        const remainingNewItems = itemsToProcess.filter(i => !existingUrls.has(i.link)).length - processed;
-        if (remainingNewItems > 0) {
-          Logger.debug('3秒待機中 (レート制限)...');
-          await new Promise(resolve => setTimeout(resolve, 3000));
+        try {
+          // 強化された重複チェック（link、タイトル、生成予定ID）
+          const normalizedTitle = item.title.trim().toLowerCase();
+          const generatedId = this.generateUniqueId(item.link);
+          
+          if (existingLinks.has(item.link)) {
+            skipped++;
+            summary.articleStats.skippedExisting++;
+            Logger.debug(`スキップ (既存link): ${item.title}`);
+            continue;
+          }
+          
+          if (existingTitles.has(normalizedTitle)) {
+            skipped++;
+            summary.articleStats.skippedExisting++;
+            Logger.debug(`スキップ (既存title): ${item.title}`);
+            continue;
+          }
+          
+          Logger.info(`処理中 (${processed + 1}/${itemsToProcess.length}): ${item.title}`);
+          
+          // AI翻訳・要約処理
+          const translationStart = Date.now();
+          const translated = await this.translateAndSummarize(item.title, item.description);
+          const translationTime = Date.now() - translationStart;
+          summary.aiStats.groqApiCalls++;
+          summary.aiStats.successfulTranslations++;
+          summary.aiStats.averageTranslationTimeMs = 
+            (summary.aiStats.averageTranslationTimeMs * (summary.aiStats.successfulTranslations - 1) + translationTime) / summary.aiStats.successfulTranslations;
+          
+          const newsItem: NewsItem = {
+            id: generatedId, // 強化されたユニークID生成
+            title: item.title,
+            link: item.link,
+            description: item.description,
+            japaneseTitle: translated.japaneseTitle,
+            japaneseDescription: translated.japaneseDescription,
+            technicalTags: translated.technicalTags,
+            extractedLinks: translated.extractedLinks,
+            date: item.pubDate || new Date().toISOString()
+          };
+          
+          // Cosmos DBにupsert（重複時は上書き）
+          try {
+            await this.container.items.upsert(newsItem);
+            summary.databaseStats.cosmosDbOperations++;
+            summary.databaseStats.successfulWrites++;
+            Logger.debug(`Cosmos DB保存成功: ${generatedId}`);
+          } catch (dbError) {
+            summary.databaseStats.cosmosDbOperations++;
+            summary.databaseStats.failedWrites++;
+            summary.errorDetails?.push(`Cosmos DB write failed for: ${item.title}`);
+            throw dbError;
+          }
+          
+          newArticles.push(newsItem);
+          processed++;
+          summary.articleStats.newArticles++;
+          
+          Logger.info(`処理完了 (${processed}/${itemsToProcess.length - skipped}): 技術タグ[${translated.technicalTags.slice(0, 3).join(', ')}${translated.technicalTags.length > 3 ? '...' : ''}]`);
+          
+        } catch (error) {
+          Logger.error(`記事処理エラー [${item.title}]:`, error);
+          summary.errorDetails?.push(`Processing failed for: ${item.title} - ${error}`);
+          continue; // エラーが発生しても他の記事の処理を継続
         }
       }
       
@@ -548,7 +500,13 @@ class AzureNewsProcessor {
         Logger.info(`スキップ記事: ${skipped}件 (既存)`);
         Logger.info(`削除記事: ${deletedCount}件 (${this.retentionDays}日以上経過)`);
         Logger.info(`総保存記事数: ${existingData.articles.length}件 (削除前)`);
-        return;
+        
+        summary.articleStats.deletedOldArticles = deletedCount;
+        summary.endTime = new Date().toISOString();
+        summary.processingTimeMs = new Date().getTime() - startTime.getTime();
+        summary.processingTimeSec = Math.round(summary.processingTimeMs / 1000);
+        summary.success = true;
+        return summary;
       }
       
       // 新しい記事を既存データに追加（既に両方とも保持期間フィルタ済み）
@@ -557,24 +515,28 @@ class AzureNewsProcessor {
       // 日付の降順でソート（新しい記事が先頭に）
       allArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
-      // データを保存
-      Logger.info('Cosmos DBとJSONファイルへの書き込み中...');
+      // データを保存（Cosmos DBに格納済み、ローカルファイルは not needed）
       const updatedData: StoredData = {
         lastUpdated: new Date().toISOString(),
         articles: allArticles
       };
-
-      await this.saveData(updatedData);
       
-      const endTime = new Date();
-      const processingTimeMs = endTime.getTime() - startTime.getTime();
-      const processingTimeSec = Math.round(processingTimeMs / 1000);
+      // Azure Functions環境ではローカルファイルへの書き込み不要
+      // fs.writeFileSync(this.dataFile, JSON.stringify(updatedData, null, 2));
       
-      Logger.info('書き込み完了');
+      Logger.info('Cosmos DB書き込み完了');
       
       // 古い記事を削除
       Logger.info('=== 古い記事の削除処理 ===');
       const deletedCount = await this.deleteOldArticles();
+      summary.articleStats.deletedOldArticles = deletedCount;
+      
+      const endTime = new Date();
+      summary.endTime = endTime.toISOString();
+      summary.processingTimeMs = endTime.getTime() - startTime.getTime();
+      summary.processingTimeSec = Math.round(summary.processingTimeMs / 1000);
+      summary.articleStats.totalStoredArticles = allArticles.length;
+      summary.success = true;
       
       Logger.info('=== 処理結果サマリー ===');
       Logger.info(`新規処理記事: ${processed}件`);
@@ -582,106 +544,19 @@ class AzureNewsProcessor {
       Logger.info(`削除記事: ${deletedCount}件 (${this.retentionDays}日以上経過)`);
       Logger.info(`総保存記事数: ${allArticles.length}件`);
       Logger.info(`処理終了時刻: ${Logger.getCurrentTime()}`);
-      Logger.info(`総処理時間: ${processingTimeSec}秒 (${Math.floor(processingTimeSec/60)}分${processingTimeSec%60}秒)`);
+      Logger.info(`総処理時間: ${summary.processingTimeSec}秒 (${Math.floor(summary.processingTimeSec/60)}分${summary.processingTimeSec%60}秒)`);
+      
+      
+      return summary;
       
     } catch (error) {
       Logger.error('処理中にエラーが発生しました:', error);
+      summary.success = false;
+      summary.endTime = new Date().toISOString();
+      summary.processingTimeMs = new Date().getTime() - startTime.getTime();
+      summary.processingTimeSec = Math.round(summary.processingTimeMs / 1000);
+      summary.errorDetails?.push(`Fatal error: ${error}`);
       throw error;
     }
   }
-}
-
-// メイン実行
-async function main() {
-  // コマンドライン引数を解析
-  const args = process.argv.slice(2);
-  let limitCount: number | undefined;
-  let logLevel: LogLevel = LogLevel.INFO;
-  
-  // 引数解析
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    
-    if (arg === '--debug' || arg === '-d') {
-      logLevel = LogLevel.DEBUG;
-    } else if (arg === '--log-level') {
-      const level = args[i + 1];
-      if (level === 'DEBUG' || level === 'debug') {
-        logLevel = LogLevel.DEBUG;
-        i++; // 次の引数をスキップ
-      } else if (level === 'INFO' || level === 'info') {
-        logLevel = LogLevel.INFO;
-        i++;
-      } else {
-        Logger.error('Error: Invalid log level. Use DEBUG or INFO');
-        process.exit(1);
-      }
-    } else if (!isNaN(parseInt(arg, 10))) {
-      // 数値は制限数として扱う
-      const limit = parseInt(arg, 10);
-      if (limit < 0) {
-        Logger.error('Error: Limit must be a non-negative number');
-        printUsage();
-        process.exit(1);
-      }
-      limitCount = limit === 0 ? Number.MAX_SAFE_INTEGER : limit; // 0の場合は実質無制限
-    } else if (arg === '--help' || arg === '-h') {
-      printUsage();
-      process.exit(0);
-    } else {
-      Logger.error(`Error: Unknown argument: ${arg}`);
-      printUsage();
-      process.exit(1);
-    }
-  }
-  
-  // ログレベルを設定
-  Logger.setLevel(logLevel);
-  
-  // 環境変数チェック
-  if (!process.env.GROQ_API_KEY) {
-    Logger.error('Error: GROQ_API_KEY environment variable is required');
-    Logger.error('Please set it with: export GROQ_API_KEY="your-api-key"');
-    process.exit(1);
-  }
-  
-  if (!process.env.COSMOS_DB_ENDPOINT || !process.env.COSMOS_DB_KEY) {
-    Logger.error('Error: Cosmos DB environment variables are required');
-    Logger.error('Please set COSMOS_DB_ENDPOINT and COSMOS_DB_KEY in .env file');
-    process.exit(1);
-  }
-  
-  try {
-    const processor = new AzureNewsProcessor();
-    await processor.processUpdates(limitCount);
-    Logger.info('=== 処理が正常に完了しました ===');
-  } catch (error) {
-    Logger.error('処理が失敗しました:', error);
-    process.exit(1);
-  }
-}
-
-function printUsage(): void {
-  console.log(`
-使用方法: npx tsx update-db/update-news.ts [OPTIONS] [LIMIT]
-
-OPTIONS:
-  --debug, -d              Debugレベルのログを出力 (詳細情報表示)
-  --log-level LEVEL        ログレベルを指定 (DEBUG|INFO)
-  --help, -h               このヘルプを表示
-
-ARGUMENTS:
-  LIMIT                    処理する記事数の上限 (デフォルト: 100件, 0で全件処理)
-
-例:
-  npx tsx update-db/update-news.ts                    # 100件をINFOレベルで処理
-  npx tsx update-db/update-news.ts 5                  # 最初の5件をINFOレベルで処理  
-  npx tsx update-db/update-news.ts 0                  # 全記事を処理 (Rate limitに注意)
-  npx tsx update-db/update-news.ts --debug 3          # 最初の3件をDEBUGレベルで処理
-  npx tsx update-db/update-news.ts --log-level DEBUG  # 100件をDEBUGレベルで処理
-`);
-}
-
-if (require.main === module) {
-  main();
 }

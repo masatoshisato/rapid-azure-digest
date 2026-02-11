@@ -1,22 +1,36 @@
 {
-  "name": "rapid-azure-digest",
+  "name": "rapid-azure-digest-update-articles-func",
   "version": "1.0.0",
-  "description": "Azure Daily News Digest - RSS aggregation and AI summarization",
-  "private": true,
+  "description": "Azure Functions Timer Trigger for RSS news processing",
+  "main": "dist/src/index.js",
   "scripts": {
-    "start": "cd api && npm run start",
-    "dev": "./dev.sh",
-    "update-articles": "cd update-articles && npm run update-articles",
-    "build-api": "cd api && npm run build",
-    "build-scripts": "cd update-articles && npm run build",
-    "help": "echo '🚀 Quick Commands:' && echo '  npm run dev     - Start development server' && echo '  npm run build-api   - Build API' && echo '  npm run build-scripts - Build update-articles scripts' && echo '  npm run update-articles - Update RSS articles' && echo '' && echo '📖 Documentation:' && echo '  README.md - Full documentation' && echo '  LOCAL_DEVELOPMENT.md - Quick reference' && echo '' && echo '⚠️  Node.js v20 required! Run: export PATH=\"/usr/local/opt/node@20/bin:$PATH\"'",
-    "check-node": "node --version && echo 'Node.js version check completed. Required: v20.x.x'"
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prestart": "npm run build",
+    "start": "func start",
+    "clean": "rimraf dist",
+    "update-articles": "npm run start",
+    "dev": "npm run start",
+    "test": "npm run build"
   },
-  "keywords": ["azure", "rss", "news", "ai", "summary"],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "@azure/cosmos": "^4.9.0",
+    "@azure/functions": "^4.11.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.5",
+    "feedparser": "^2.2.10",
+    "groq-sdk": "^0.7.0",
+    "node-fetch": "^2.7.0",
+    "xml2js": "^0.6.2"
+  },
   "devDependencies": {
-    "@azure/static-web-apps-cli": "^2.0.7"
+    "@types/feedparser": "^2.2.2",
+    "@types/node": "^20.19.33",
+    "@types/node-fetch": "^2.6.11",
+    "@types/xml2js": "^0.4.14",
+    "rimraf": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=20.0.0"

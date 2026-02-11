@@ -1,18 +1,21 @@
 {
-  "name": "rapid-azure-digest-update-articles",
+  "name": "rapid-azure-digest-update-articles-func",
   "version": "1.0.0",
-  "description": "GitHub Actions update-articles scripts for RSS news processing",
-  "main": "update-articles.ts",
+  "description": "Azure Functions Timer Trigger for RSS news processing",
+  "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/update-articles.js",
-    "update-articles": "ts-node update-articles.ts",
-    "dev": "npm run update-articles",
-    "check-env": "node -e \"require('dotenv').config({path: '../.env'}); console.log('GROQ_API_KEY:', process.env.GROQ_API_KEY ? 'gsk_...(設定済み)' : '❌ 未設定'); console.log('COSMOS_DB_ENDPOINT:', process.env.COSMOS_DB_ENDPOINT || '❌ 未設定'); console.log('COSMOS_DB_KEY:', process.env.COSMOS_DB_KEY ? '****(設定済み)' : '❌ 未設定');\"",
-    "test": "npm run update-articles"
+    "watch": "tsc --watch",
+    "prestart": "npm run build",
+    "start": "func start",
+    "clean": "rimraf dist",
+    "update-articles": "npm run start",
+    "dev": "npm run start",
+    "test": "npm run build"
   },
   "dependencies": {
     "@azure/cosmos": "^4.9.0",
+    "@azure/functions": "^4.11.0",
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.4.5",
     "feedparser": "^2.2.10",
@@ -22,9 +25,10 @@
   },
   "devDependencies": {
     "@types/feedparser": "^2.2.2",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.33",
     "@types/node-fetch": "^2.6.11",
     "@types/xml2js": "^0.4.14",
+    "rimraf": "^5.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0"
   },
