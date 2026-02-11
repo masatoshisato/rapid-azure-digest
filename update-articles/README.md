@@ -1,294 +1,289 @@
-# Update-Articles - 自動化スクリプト
+# Update Articles Function
 
-ニュース更新・データチェック・運用監視のための自動化スクリプト群です。GitHub ActionsやローカルCLIから実行可能です。
+Azure Functions を使用したライブニュース更新システム。Microsoft Azure RSS から記事を取得し、AIによる日本語要約を行い、Cosmos DB に保存する自動化システムです。
 
 ## 📁 ファイル構成
 
 ```
 update-articles/
-├── update-articles.ts      # メインスクリプト: RSS→AI要約→DB保存
-├── check-cosmos.ts         # Cosmos DB 接続・データ確認
-├── check-urls.ts           # URL有効性チェック
-├── check-workflow-result.sh # GitHub Actions 結果確認
-├── package.json            # 依存関係・実行スクリプト
-├── tsconfig.json           # TypeScript コンパイル設定
-├── data/
-│   └── news.json          # RSS フィード設定
-└── README.md              # このファイル
+├── src/
+│   ├── index.ts                 # Azure Functions エントリーポイント
+│   ├── functions/
+│   │   ├── update-articles-manual.ts   # HTTPトリガー（手動実行）
+│   │   └── update-articles-timer.ts    # タイマートリガー（自動実行）
+│   └── lib/
+│       ├── news-processor.ts    # RSS処理・AI要約・DB操作のメインロジック
+│       └── types.ts            # TypeScript型定義・Logger
+├── dist/                       # TypeScript コンパイル出力
+├── data/                       # ローカル開発用データ（非本番使用）
+├── host.json                   # Azure Functions ホスト設定
+├── local.settings.json         # ローカル環境変数（要作成）
+├── local.settings.json.example # 環境変数テンプレート
+├── package.json               # Node.js 依存関係
+├── tsconfig.json              # TypeScript 設定
+├── check-cosmos.ts            # Cosmos DB 接続確認スクリプト
+└── check-urls.ts              # RSS URL 確認スクリプト
 ```
 
-## 🚀 主要スクリプト
+## 🛠️ 技術スタック
 
-### 1. update-articles.ts - ニュース更新エンジン
+- **Runtime**: Node.js 20.x
+- **Framework**: Azure Functions v4
+- **Language**: TypeScript 5.x
+- **RSS Processing**: FeedParser
+- **AI Translation**: Groq SDK (Llama LLM)
+- **Database**: Azure Cosmos DB
+- **Web Scraping**: Cheerio
+- **HTTP Client**: node-fetch
 
-**機能**:
-- 複数RSS フィードから Azure関連記事を自動取得
-- Groq APIによる高精度AI要約 (日本語)
-- 重複除去とデータ整合性チェック
-- Azure Cosmos DB への安全な保存
+## ☁️ 想定 Azure リソース
 
-**実行方法**:
-```bash
-cd update-articles
+- **Azure Functions App** (Flex Consumption Plan)
+- **Azure Cosmos DB** (SQL API)
+- **Azure Storage Account** (Functions 実行用)
+- **Application Insights** (ログ・監視)
 
-# 依存関係インストール
-npm install
+## 📡 インターフェース仕様
 
-# 環境変数設定
-export GROQ_API_KEY="your-groq-api-key"
-export COSMOS_DB_ENDPOINT="https://your-cosmos.documents.azure.com:443/"
-export COSMOS_DB_KEY="your-cosmos-key"
-export COSMOS_DB_DATABASE_NAME="NewsDatabase"
-export COSMOS_DB_CONTAINER_NAME="Articles"
+### HTTP トリガー
 
-# スクリプト実行
-npm run update-articles
-```
+**エンドポイント**: `POST/GET /api/updatearticlesmanual`
 
-**処理フロー**:
-```
-RSS取得 → 記事解析 → AI要約 → 重複チェック → DB保存 → ログ出力
-```
+**認証**: Function Key 必須
 
-**設定ファイル** (`data/news.json`):
+**パラメーター**:
+- `limit` (optional): 処理記事数上限 (default: 100)
+
+**成功レスポンス** (200):
 ```json
 {
-  "sources": [
-    {
-      "name": "Azure Blog",
-      "url": "https://azure.microsoft.com/en-us/blog/feed/",
-      "category": "Official"
+  "success": true,
+  "message": "ニュース更新が正常に完了しました",
+  "functionName": "updateArticlesManual",
+  "summary": {
+    "success": true,
+    "processingTimeMs": 1012,
+    "rssStats": {
+      "totalRssItems": 200,
+      "recentRssItems": 34,
+      "processedItems": 1
     },
-    {
-      "name": "Azure Updates",
-      "url": "https://azure.microsoft.com/en-us/updates/feed/",
-      "category": "Updates"
+    "articleStats": {
+      "newArticles": 0,
+      "skippedExisting": 1,
+      "totalStoredArticles": 33
+    },
+    "databaseStats": {
+      "cosmosDbOperations": 0,
+      "successfulWrites": 0,
+      "failedWrites": 0
+    },
+    "aiStats": {
+      "groqApiCalls": 0,
+      "successfulTranslations": 0
     }
-  ]
+  }
 }
 ```
 
-**ログ例**:
+**エラーレスポンス** (500):
+```json
+{
+  "success": false,
+  "message": "エラーメッセージ",
+  "error": {
+    "name": "ErrorType",
+    "message": "詳細メッセージ",
+    "stack": "スタックトレース",
+    "timestamp": "2026-02-11T00:00:00.000Z"
+  }
+}
 ```
-🔄 RSS フィード取得開始...
-📰 Azure Blog から 15 件の記事を取得
-📰 Azure Updates から 8 件の記事を取得
-🤖 AI要約処理: 23/23 件完了
-🗃️ Cosmos DB 保存: 6 件 (重複除去: 17 件)
-✅ ニュース更新完了 (実行時間: 45.2秒)
-```
 
-### 2. check-cosmos.ts - DB状態確認
+### Timer トリガー
 
-**機能**:
-- Cosmos DB 接続テスト
-- データ件数・構造確認
-- 最新記事の取得日時確認
+**スケジュール**: `0 0 */6 * * *` (6時間毎)
 
-**実行方法**:
+**処理**: RSS取得 → AI要約 → Cosmos DB保存 → 古い記事削除
+
+## ⚙️ 環境変数
+
+### 必須環境変数
+
 ```bash
-npm run check-cosmos
-```
-
-**出力例**:
-```
-✅ Cosmos DB 接続成功
-📊 総記事数: 6 件
-🕒 最新記事: 2026-02-09T12:00:00.000Z
-💾 データベース: NewsDatabase
-📄 コンテナ: Articles
-```
-
-### 3. check-urls.ts - URL有効性チェック
-
-**機能**:
-- DB内記事URLの生存確認
-- HTTPステータスコード検証
-- リンク切れレポート生成
-
-**実行方法**:
-```bash
-npm run check-urls
-```
-
-### 4. check-workflow-result.sh - GitHub Actions監視
-
-**機能**:
-- 最新ワークフロー実行結果確認
-- 失敗時のアラート
-- ログ出力とステータス取得
-
-**実行方法**:
-```bash
-./check-workflow-result.sh
-```
-
-## ⚙️ 環境設定
-
-### 必要な環境変数
-```bash
-# Groq API (AI要約用)
-GROQ_API_KEY=your-groq-api-key
-
-# Azure Cosmos DB
-COSMOS_DB_ENDPOINT=https://your-cosmos.documents.azure.com:443/
+# Cosmos DB 接続
+COSMOS_DB_ENDPOINT=https://your-cosmos-account.documents.azure.com:443/
 COSMOS_DB_KEY=your-cosmos-primary-key
 COSMOS_DB_DATABASE_NAME=NewsDatabase
 COSMOS_DB_CONTAINER_NAME=Articles
+
+# AI要約サービス
+GROQ_API_KEY=your_groq_api_key_here
+
+# 記事保持設定
+ARTICLE_RETENTION_DAYS=30
+
+# Azure Functions （自動設定）
+AzureWebJobsStorage=your-storage-connection-string
 ```
 
-### Groq API キー取得
-1. [Groq Console](https://console.groq.com/) でアカウント作成（無料）
-2. API Key を生成 (月間制限: 6,000リクエスト/無料)
-3. 環境変数に設定
+### 設定ファイル
 
-### Azure Cosmos DB設定
-1. Azure Portal → Cosmos DB → キー
-2. プライマリキーとエンドポイントを取得
-3. データベース・コンテナ名を確認
-
-## 🤖 AI要約システム
-
-### Groq API設定
-```typescript
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
-
-const completion = await groq.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: "Azure関連記事を200文字程度の日本語で要約してください"
-    },
-    {
-      role: "user", 
-      content: article.content
-    }
-  ],
-  model: "llama-3.3-70b-versatile",
-  temperature: 0.3,
-  max_tokens: 300
-});
-```
-
-### 要約品質基準
-- **文字数**: 150-250文字
-- **言語**: 日本語
-- **内容**: 技術的な正確性重視
-- **形式**: 読みやすい文章構造
-
-## 📅 自動実行設定 (GitHub Actions)
-
-### ワークフロー設定 (.github/workflows/update-articles.yml)
-```yml
-name: Daily Azure News Update
-on:
-  schedule:
-    - cron: '0 15 * * *'  # 毎日午前0時 JST
-  workflow_dispatch:
-
-jobs:
-  update-articles:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: cd update-articles && npm install
-      - run: cd update-articles && npm run update-articles
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          COSMOS_DB_ENDPOINT: ${{ secrets.COSMOS_DB_ENDPOINT }}
-          COSMOS_DB_KEY: ${{ secrets.COSMOS_DB_KEY }}
-          COSMOS_DB_DATABASE_NAME: ${{ secrets.COSMOS_DB_DATABASE_NAME }}
-          COSMOS_DB_CONTAINER_NAME: ${{ secrets.COSMOS_DB_CONTAINER_NAME }}
-```
-
-### GitHub Secrets設定
-```
-Repository Settings → Secrets and variables → Actions
-
-必要なSecrets:
-- GROQ_API_KEY
-- COSMOS_DB_ENDPOINT  
-- COSMOS_DB_KEY
-- COSMOS_DB_DATABASE_NAME
-- COSMOS_DB_CONTAINER_NAME
-```
-
-## 🛠️ 開発・デバッグ
-
-### セットアップ
-```bash
-cd update-articles
-
-# 依存関係インストール
-npm install
-
-# TypeScript ビルド
-npx tsc
-
-# ローカル実行
-npm run update-articles
-```
-
-### デバッグモード
-```typescript
-// update-articles.ts でデバッグログ有効化
-const DEBUG = true;
-
-if (DEBUG) {
-  console.log('デバッグ: RSS データ', rssData);
-  console.log('デバッグ: AI要約結果', summary);
+`local.settings.json` (ローカル開発用):
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "COSMOS_DB_ENDPOINT": "https://your-account.documents.azure.com:443/",
+    "COSMOS_DB_KEY": "your-key-here",
+    "COSMOS_DB_DATABASE_NAME": "NewsDatabase",
+    "COSMOS_DB_CONTAINER_NAME": "Articles",
+    "GROQ_API_KEY": "your-groq-key",
+    "ARTICLE_RETENTION_DAYS": "30"
+  }
 }
 ```
 
-### トラブルシューティング
+## 🔨 ビルド方法
+
 ```bash
-# よくある問題解決
+# 依存関係インストール
+npm install
 
-# 1. TypeScript コンパイルエラー
-npx tsc --noEmit  # 構文チェック
+# TypeScript コンパイル
+npm run build
 
-# 2. Groq API エラー
-curl -H "Authorization: Bearer $GROQ_API_KEY" https://api.groq.com/v1/models
-
-# 3. Cosmos DB 接続エラー  
-npm run check-cosmos
-
-# 4. RSS取得エラー
-curl -I "https://azure.microsoft.com/en-us/blog/feed/"
+# 監視モード（開発時）
+npm run watch
 ```
+
+## 🚀 ローカル実行方法
+
+### 1. 前提条件
+
+- Node.js 20.x
+- Azure Functions Core Tools v4
+- Azure Cosmos DB インスタンス
+
+### 2. 環境設定
+
+```bash
+# 設定ファイル作成
+cp local.settings.json.example local.settings.json
+# 必要な環境変数を設定
+```
+
+### 3. 実行
+
+```bash
+# ローカル Functions 起動
+npm run start
+# または
+func start
+
+# HTTP トリガー テスト
+curl "http://localhost:7071/api/updatearticlesmanual?limit=1"
+```
+
+### 4. デバッグ
+
+- VS Code デバッグ設定済み
+- ブレークポイント対応
+- ローカル Cosmos DB エミュレーター対応
+
+## 🚢 デプロイ方法
+
+### Azure CLI デプロイ
+
+```bash
+# ビルド
+npm run build
+
+# Azure Functions にデプロイ
+func azure functionapp publish update-articles
+
+# 環境変数設定（初回のみ）
+az functionapp config appsettings set \
+  --name update-articles \
+  --resource-group DailyAzureNewsUpdate \
+  --settings "COSMOS_DB_ENDPOINT=https://your-account.documents.azure.com:443/" \
+             "COSMOS_DB_KEY=your-key" \
+             "GROQ_API_KEY=your-groq-key"
+```
+
+### CI/CD デプロイ
+
+GitHub Actions 経由でのデプロイをサポート（`.github/workflows` 設定済み）
+
+## 🏗️ プログラム構造と主要処理仕様
+
+### メイン処理フロー
+
+1. **RSS 取得** (`fetchRSSFeed()`)
+   - Microsoft Azure RSS を取得
+   - 記事の重複チェック（URL・タイトル・ハッシュ）
+
+2. **AI 要約** (`translateWithGroq()`)
+   - Groq Llama モデルで日本語要約
+   - エラー時は元のタイトル・説明を使用
+
+3. **データ保存** (`processUpdates()`)
+   - Cosmos DB への upsert 操作
+   - 記事の重複防止（複合キーチェック）
+
+4. **古い記事削除** 
+   - 保持期間（ARTICLE_RETENTION_DAYS）を超えた記事を自動削除
+
+### エラーハンドリング
+
+- **詳細エラーログ**: スタックトレース付きエラー情報
+- **リトライ機構**: AI API 失敗時の自動リトライ
+- **部分エラー許容**: 一部記事の失敗でも処理継続
+
+### パフォーマンス
+
+- **バッチ処理**: 複数記事の一括処理
+- **メモリ効率**: ストリーミング RSS パース
+- **DB 最適化**: upsert による重複回避
 
 ## 📊 監視・ログ
 
-### 実行ログ例
+- **Application Insights** 統合
+- **構造化ログ**: JSON 形式ログ出力
+- **メトリクス**: 処理時間・記事数・エラー率
+- **アラート**: 実行失敗時の通知
+
+## 🔧 開発・運用
+
+### トラブルシューティング
+
+```bash
+# Cosmos DB 接続テスト
+npx ts-node check-cosmos.ts
+
+# RSS URL 確認
+npx ts-node check-urls.ts
+
+# ローカル実行ログ確認
+func start --verbose
 ```
-2026-02-09 12:00:00 [INFO] ニュース更新開始
-2026-02-09 12:00:05 [INFO] RSS取得完了: 23件
-2026-02-09 12:00:30 [INFO] AI要約完了: 23/23件
-2026-02-09 12:00:35 [INFO] DB保存完了: 6件 (新規)
-2026-02-09 12:00:36 [INFO] 実行時間: 36.2秒
-```
 
-### エラー監視
-- **RSS取得失敗**: HTTP 4xx/5xx エラー
-- **AI要約エラー**: Groq API制限・エラー
-- **DB保存エラー**: Cosmos DB接続・認証エラー
-- **重複エラー**: データ整合性チェック失敗
+### パフォーマンスチューニング
 
-## 🔄 今後の改善予定
+- `ARTICLE_RETENTION_DAYS` 調整で DB サイズ管理
+- Function timeout 設定（現在: 10分）
+- Cosmos DB RU 設定最適化
 
-### 機能拡張
-- [ ] 複数言語対応 (英語要約)
-- [ ] 記事カテゴリ自動分類
-- [ ] トレンド分析・キーワード抽出
-- [ ] Slack/Teams 通知連携
+## 📄 ライセンス
 
-### 運用改善  
-- [ ] エラー通知システム
-- [ ] パフォーマンス監視
-- [ ] データ品質チェック
-- [ ] 自動テスト追加
+MIT License
+
+## 🤝 コントリビュート
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
