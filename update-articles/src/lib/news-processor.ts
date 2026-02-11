@@ -2,8 +2,6 @@ import FeedParser from 'feedparser';
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { Groq } from 'groq-sdk';
-import fs from 'fs';
-import path from 'path';
 import { CosmosClient, Container, Database } from '@azure/cosmos';
 import crypto from 'crypto';
 import { Logger, CustomRSSItem, NewsItem, StoredData, ProcessingSummary } from './types';
@@ -13,8 +11,6 @@ export class AzureNewsProcessor {
   private cosmosClient: CosmosClient;
   private database: Database;
   private container: Container;
-  private dataDir: string;
-  private dataFile: string;
   private rssUrl: string = 'https://www.microsoft.com/releasecommunications/api/v2/azure/rss';
   private retentionDays: number; // 記事保持期間（日数）
 
@@ -40,10 +36,6 @@ export class AzureNewsProcessor {
     this.cosmosClient = new CosmosClient({ endpoint, key });
     this.database = this.cosmosClient.database(databaseName);
     this.container = this.database.container(containerName);
-    
-    // Azure Functions環境ではローカルファイニ不要（Cosmos DBを使用）
-    this.dataDir = '';
-    this.dataFile = '';
   }
 
   async fetchRSSFeed(): Promise<CustomRSSItem[]> {
@@ -221,16 +213,6 @@ export class AzureNewsProcessor {
         articles: []
       };
     }
-  }
-
-  // Azure Functions環境では不要になったメソッド（Cosmos DBのみ使用）
-  private loadExistingDataFromFile(): StoredData {
-    // Azure Functions環境ではローカルファイルアクセスを無効化
-    Logger.info('ローカルファイルアクセスは Azure Functions では無効です');
-    return {
-      lastUpdated: new Date().toISOString(), 
-      articles: []
-    };
   }
 
   private generateUniqueId(link: string): string {
@@ -520,9 +502,6 @@ export class AzureNewsProcessor {
         lastUpdated: new Date().toISOString(),
         articles: allArticles
       };
-      
-      // Azure Functions環境ではローカルファイルへの書き込み不要
-      // fs.writeFileSync(this.dataFile, JSON.stringify(updatedData, null, 2));
       
       Logger.info('Cosmos DB書き込み完了');
       
