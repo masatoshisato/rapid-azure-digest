@@ -202,7 +202,7 @@ curl "http://localhost:7071/api/updatearticlesmanual?limit=1"
 npm run build
 
 # Azure Functions にデプロイ
-func azure functionapp publish update-articles
+func azure functionapp publish update-articles --typescript
 
 # 環境変数設定（初回のみ）
 az functionapp config appsettings set \

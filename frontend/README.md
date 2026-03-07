@@ -269,7 +269,12 @@ console.log(document.getElementById('articles-container'));
 ### Azure Static Web Apps
 ```bash
 # SWA CLI でデプロイ
-swa deploy frontend --api-location api --api-language node --api-version 20 --env production
+
+## デプロイトーク取得
+export SWA_DEPLOY_TOKEN=$(az staticwebapp secrets list --name rapid-azure-digest --resource-group DailyAzureNewsUpdate --query "properties.apiKey" -o tsv)
+
+## デプロイ
+swa deploy ./frontend --api-location ./api --deployment-token "$SWA_DEPLOY_TOKEN" --env production --api-language node --api-version 20
 
 # デプロイ先確認
 # https://salmon-beach-0b86ff00f.4.azurestaticapps.net
