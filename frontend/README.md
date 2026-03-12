@@ -40,7 +40,7 @@ frontend/
 ### SWA CLI 統合開発環境
 ```bash
 # プロジェクトルートから
-swa start frontend --api-location api --api-language node --api-version 20
+swa start frontend --api-location api
 
 # アクセス:
 # 🌐 http://localhost:4280

@@ -287,7 +287,13 @@
                 card.className = 'bg-azure-card rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer';
                 
                 const publishDate = new Date(article.date);
-                const summary = this.truncateText(article.japaneseDescription, 120);
+                // カードプレビュー用: 箇条書きマーカーと改行（実際の改行・リテラル\nの両方）を除去してプレーンテキストにする
+                const previewText = (article.japaneseDescription || '')
+                    .replace(/- 【[^】]*】/g, '')
+                    .replace(/\\n|\n/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                const summary = this.truncateText(previewText, 120);
                 
                 card.innerHTML = `
                     <div class="p-6">
@@ -370,7 +376,6 @@
 
                         <!-- Article Content -->
                         <div class="prose max-w-none">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-3">概要</h3>
                             <div class="text-gray-700 leading-relaxed mb-4">
                                 ${this.cleanText(article.japaneseDescription)}
                             </div>
@@ -480,20 +485,23 @@
 
             cleanText(text) {
                 if (!text) return '';
-                
-                // HTMLエスケープ
-                const escaped = this.escapeHtml(text);
-                
-                // 不要なスペースと改行を整理
-                return escaped
-                    .replace(/\s+/g, ' ')           // 連続するスペース・タブ・改行を単一スペースに
-                    .replace(/^\s+|\s+$/g, '')      // 前後のスペースを削除
-                    .replace(/\s*\.\s*/g, '. ')     // ピリオド周りのスペースを統一
-                    .replace(/\s*,\s*/g, ', ')      // カンマ周りのスペースを統一
-                    .replace(/\s*:\s*/g, ': ')      // コロン周りのスペースを統一
-                    .replace(/。\s*/g, '。 ')       // 句点後のスペースを統一
-                    .replace(/、\s*/g, '、')        // 読点後の不要スペース削除
-                    .trim();                        // 最終的な前後スペース削除
+                return text
+                    .replace(/\\n/g, '\n')
+                    .split('\n')
+                    .map(line => line.trim().replace(/^-\s*/, ''))  // 先頭の "- " を削除
+                    .filter(line => line.length > 0)
+                    .map(line => {
+                        // 「【ラベル】テキスト」 → ラベルとテキストを分离して別行表示
+                        const match = line.match(/^(【[^】]*】)\s*(.*)$/);
+                        if (match) {
+                            const label = this.escapeHtml(match[1]);
+                            const content = this.escapeHtml(match[2]);
+                            return `<p class="bullet-label">${label}</p>`
+                                 + (content ? `<p class="bullet-content">${content}</p>` : '');
+                        }
+                        return `<p class="bullet-content">${this.escapeHtml(line)}</p>`;
+                    })
+                    .join('');
             }
         }
 
@@ -516,6 +524,25 @@
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
+        }
+
+        /* 箇条書き: ラベル行（「【概要】」等） */
+        .bullet-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.15em;
+            margin-top: 1em;
+            line-height: 1.4;
+        }
+        .bullet-label:first-child {
+            margin-top: 0;
+        }
+        /* 箇条書き: テキスト行 */
+        .bullet-content {
+            margin-bottom: 0;
+            margin-top: 0;
+            line-height: 1.6;
+            color: #4b5563;
         }
 
         /* Modal specific styles */
