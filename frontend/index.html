@@ -31,15 +31,19 @@
                     <svg class="w-8 h-8 mr-3" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
                     </svg>
-                    <h1 class="text-2xl md:text-3xl font-bold">Azure ニュース ダイジェスト</h1>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">Azure ニュース ダイジェスト</h1>
+                        <p class="text-xs opacity-75 mt-1">本記事は Microsoft 社の <a href="https://azure.microsoft.com/ja-jp/updates" target="_blank" rel="noopener" class="underline hover:opacity-100">Azure Update</a> をもとに要約しています</p>
+                    </div>
                 </div>
-                <div class="text-sm md:text-base opacity-90 mt-2 md:mt-0">
-                    <div class="text-xs opacity-75">
-                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="mt-2 md:mt-0">
+                    <button id="openDisclaimerBtn"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium bg-white bg-opacity-15 hover:bg-opacity-25 border border-white border-opacity-30 backdrop-blur-sm transition-all duration-200 text-white">
+                        <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        AI翻訳・要約のため内容に誤りがある可能性があります
-                    </div>
+                        このサイトについて
+                    </button>
                 </div>
             </div>
         </div>
@@ -148,8 +152,32 @@
             <p class="text-sm text-gray-400 mt-2">
                 AI翻訳・要約による自動処理 | 毎日午前0時更新
             </p>
+
         </div>
     </footer>
+
+    <!-- Disclaimer Modal -->
+    <div id="disclaimerModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-lg w-full shadow-2xl">
+            <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900">このサイトについて・免責事項</h2>
+                <button id="closeDisclaimerBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="px-6 py-5 space-y-4 text-sm text-gray-700 leading-relaxed">
+                <p>本サイトは、Microsoft Azure の公式情報（Azure Updates）をもとに、AI による自動翻訳および要約処理を行い、情報提供を目的として運営するものです。</p>
+                <p>掲載内容はAIによる自動生成を経たものであり、その正確性・完全性・最新性・適法性を保証するものではありません。</p>
+                <p>本サイトの情報を利用したこと、または利用できなかったことにより生じた、いかなる損害・損失・不利益についても、当サイト運営者は一切の責任を負いかねます。</p>
+                <p>正確な情報については、必ず <a href="https://azure.microsoft.com/ja-jp/updates" target="_blank" rel="noopener" class="text-azure-blue underline hover:opacity-80">Microsoft 公式サイト</a> にてご確認ください。</p>
+            </div>
+            <div class="border-t border-gray-200 px-6 py-4 flex justify-end">
+                <button id="closeDisclaimerBtnFooter" class="px-5 py-2 bg-azure-blue text-white text-sm font-medium rounded-lg hover:bg-azure-dark transition-colors">閉じる</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         class AzureNewsApp {
@@ -363,14 +391,18 @@
                                 </span>
                             </div>
                             
-                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-4">
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-2">
                                 ${this.escapeHtml(article.japaneseTitle)}
                             </h1>
                             
-                            ${article.title !== article.japaneseTitle ? `
-                                <h2 class="text-lg text-gray-600 font-medium mb-4">
-                                    原文: ${this.escapeHtml(article.title)}
-                                </h2>
+                            ${article.link ? `
+                                <a href="${article.link}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center text-sm text-azure-blue hover:text-azure-dark hover:underline mb-4">
+                                    <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                    元記事を見る
+                                </a>
                             ` : ''}
                         </div>
 
@@ -390,8 +422,8 @@
                         <!-- Technical Tags -->
                         ${article.technicalTags && article.technicalTags.length > 0 ? `
                             <div class="border-t border-gray-200 pt-6">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-3">技術タグ</h3>
-                                <div class="flex flex-wrap gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-lg font-semibold text-gray-900 mr-1">技術タグ</span>
                                     ${article.technicalTags.map(tag => 
                                         `<span class="inline-block bg-blue-100 text-azure-blue text-sm px-3 py-1 rounded-full font-medium">
                                             ${this.escapeHtml(tag)}
@@ -419,21 +451,6 @@
                             </div>
                         ` : ''}
 
-                        <!-- Article Metadata -->
-                        <div class="border-t border-gray-200 pt-6 text-sm text-gray-500">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <strong>公開日時:</strong> ${publishDate.toLocaleString('ja-JP')}
-                                </div>
-                                <div>
-                                    <strong>元記事URL:</strong> 
-                                    <a href="${article.link}" target="_blank" rel="noopener noreferrer" 
-                                       class="text-azure-blue hover:underline break-all">
-                                        ${article.link}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 `;
 
@@ -508,6 +525,31 @@
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             new AzureNewsApp();
+
+            // Disclaimer modal
+            const disclaimerModal = document.getElementById('disclaimerModal');
+            const openDisclaimerBtn = document.getElementById('openDisclaimerBtn');
+            const closeDisclaimerBtn = document.getElementById('closeDisclaimerBtn');
+            const closeDisclaimerBtnFooter = document.getElementById('closeDisclaimerBtnFooter');
+
+            function openDisclaimer() {
+                disclaimerModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeDisclaimer() {
+                disclaimerModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            openDisclaimerBtn.addEventListener('click', openDisclaimer);
+            closeDisclaimerBtn.addEventListener('click', closeDisclaimer);
+            closeDisclaimerBtnFooter.addEventListener('click', closeDisclaimer);
+            disclaimerModal.addEventListener('click', (e) => {
+                if (e.target === disclaimerModal) closeDisclaimer();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !disclaimerModal.classList.contains('hidden')) closeDisclaimer();
+            });
         });
     </script>
 
