@@ -21,7 +21,7 @@ api/
 ```
 
 ### 技術スタック
-- **Runtime**: Node.js 20 (LTS)
+- **Runtime**: Node.js 22 (LTS)
 - **Framework**: Azure Functions v4
 - **Language**: TypeScript 5.x
 - **Database**: Azure Cosmos DB SDK v4

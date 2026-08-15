@@ -20,9 +20,9 @@ Azure関連ニュースを自動収集・AI要約してWebサイト配信する�
 
 ### 技術スタック
 - **フロントエンド**: HTML5, Vanilla JavaScript, CSS3 (Azure Static Web Apps)
-- **API**: Azure Functions v4, TypeScript, Node.js 20
+- **API**: Azure Functions v4, TypeScript, Node.js 22
 - **データ処理**: Azure Functions v4 (Timer/HTTP Triggers)
-- **AI要約**: Groq SDK (Llama LLM)
+- **AI要約**: Groq SDK (OpenAI GPT-OSS 120B)
 - **データベース**: Azure Cosmos DB (NoSQL, Serverless)
 - **インフラ**: Bicep (Infrastructure as Code)
 - **開発環境**: SWA CLI + Azure Functions Core Tools
@@ -30,7 +30,7 @@ Azure関連ニュースを自動収集・AI要約してWebサイト配信する�
 ## 🚀 主な機能
 
 - **自動ニュース取得**: Timer Function による定期RSS収集 (6時間毎)
-- **AI要約**: Groq Llama モデルによる高品質日本語要約
+- **AI要約**: Groq の OpenAI GPT-OSS 120B による高品質日本語要約
 - **手動更新**: HTTP Function による緊急時手動実行
 - **リアルタイム配信**: Azure Static Web Apps でのグローバル配信
 - **レスポンシブUI**: モバイル・タブレット・デスクトップ完全対応
@@ -86,7 +86,7 @@ rapid-azure-digest/
 ## 🚀 クイックスタート
 
 ### 前提条件
-- **Node.js**: v20.0.0以上
+- **Node.js**: v22.0.0以上
 - **Azure Functions Core Tools**: v4.6.0以上
 - **Azure CLI**: 最新版
 - **Azure Cosmos DB**: アクティブなインスタンス
@@ -120,7 +120,7 @@ cd ../update-articles && npm run build
 #### SWA統合開発環境 (推奨)
 ```bash
 # フロントエンド + API Functions 同時起動
-swa start frontend --api-location api --api-language node --api-version 20
+swa start frontend --api-location api --api-language node --api-version 22
 
 # アクセス先:
 # 🌐 フロントエンド: http://localhost:4280

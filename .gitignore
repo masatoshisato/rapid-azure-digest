@@ -66,3 +66,16 @@ build/
 
 # Azure Functions
 local.settings.json
+
+# Azure Functions local runtime artifacts
+__azurite_db_*.json
+AzuriteConfig
+__blobstorage__/
+__queuestorage__/
+
+# Generated output from local runs
+update-articles/dist/
+update-articles/__azurite_db_*.json
+update-articles/AzuriteConfig
+update-articles/__blobstorage__/
+update-articles/__queuestorage__/

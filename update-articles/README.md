@@ -27,11 +27,11 @@ update-articles/
 
 ## 🛠️ 技術スタック
 
-- **Runtime**: Node.js 20.x
+- **Runtime**: Node.js 22.x
 - **Framework**: Azure Functions v4
 - **Language**: TypeScript 5.x
 - **RSS Processing**: FeedParser
-- **AI Translation**: Groq SDK (Llama LLM)
+- **AI Translation**: Groq SDK (OpenAI GPT-OSS 120B)
 - **Database**: Azure Cosmos DB
 - **Web Scraping**: Cheerio
 - **HTTP Client**: node-fetch
@@ -226,7 +226,7 @@ GitHub Actions 経由でのデプロイをサポート（`.github/workflows` 設
    - 記事の重複チェック（URL・タイトル・ハッシュ）
 
 2. **AI 要約** (`translateWithGroq()`)
-   - Groq Llama モデルで日本語要約
+   - Groq の OpenAI GPT-OSS 120B モデルで日本語要約
    - エラー時は元のタイトル・説明を使用
 
 3. **データ保存** (`processUpdates()`)
